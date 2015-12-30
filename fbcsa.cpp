@@ -32,12 +32,15 @@ void FBCSA::setFunctions() {
         switch (this->bs) {
         case 32:
                this->getSAValue = &FBCSA::getSAValue_32;
+               this->getSAValuesSeq = &FBCSA::getSAValuesSeq_32;
                break;
         case 64:
                this->getSAValue = &FBCSA::getSAValue_64;
+               this->getSAValuesSeq = &FBCSA::getSAValuesSeq_64;
                break;
         default:
                this->getSAValue = &FBCSA::getSAValue_general;
+               this->getSAValuesSeq = &FBCSA::getSAValuesSeq_general;
                break; 
         }
 	if (this->ht != NULL) {
@@ -405,6 +408,234 @@ unsigned int FBCSA::getSAValue_general(unsigned int i) {
 	}
 }
 
+void FBCSA::getSAValuesSeq_32(unsigned int i, unsigned int seqLen, unsigned int *saValues) {
+	unsigned int startBlock = (i / 32) * 4;
+	unsigned int endBlock = ((i + seqLen) / 32) * 4;
+	unsigned int p = i % 32;
+	unsigned int b, c, w = 0, counter = 0;
+
+	for (unsigned int i = startBlock; i <= endBlock; i = i + 4) {
+		long long offSetInd = -1;
+		b = this->alignedArr1[i + 2];
+		c = this->alignedArr1[i + 3];
+		unsigned int r = 0;
+		for (unsigned int p0 = p; p0 < 32; ++p0) {
+			if (((b >> (32 - p0 - 1)) & 1) == 1) {
+				if (offSetInd == -1) {
+					if (p0 > 0) r = __builtin_popcountll(b >> (32 - p0));
+					offSetInd = c + 3 + r;
+					r = 0;
+				}
+				else {
+					++offSetInd;
+				}
+				saValues[counter++] = this->alignedArr2[offSetInd];
+			}
+			else {
+				if (p0 > 15) {
+					unsigned int t = p0 - 16;
+					unsigned int a = (this->alignedArr1[i + 1] >> (32 - 2 * t - 2)) & 3;
+					switch (a) {
+					case 2:
+						w = ~(this->alignedArr1[i] ^ 0xAAAAAAAA);
+						break;
+					case 1:
+						w = ~(this->alignedArr1[i] ^ 0x55555555);
+						break;
+					default:
+						w = ~(this->alignedArr1[i] ^ 0x00000000);
+					}
+					r = __builtin_popcountll((w & 0x55555555) & ((w & 0xAAAAAAAA) >> 1));
+					if (t > 0) {
+						switch (a) {
+						case 2:
+							w = ~(this->alignedArr1[i + 1] ^ 0xAAAAAAAA);
+							break;
+						case 1:
+							w = ~(this->alignedArr1[i + 1] ^ 0x55555555);
+							break;
+						default:
+							w = ~(this->alignedArr1[i + 1] ^ 0x00000000);
+						}
+						w >>= (32 - 2 * t);
+						r += __builtin_popcountll((w & 0x55555555) & ((w & 0xAAAAAAAA) >> 1));
+					}
+					saValues[counter++] = this->getSAValue_32(this->alignedArr2[c + a] + r) + 1;
+					r = 0;
+				}
+				else {
+					unsigned int a = (this->alignedArr1[i] >> (32 - 2 * p0 - 2)) & 3;
+					if (p0 > 0) {
+						switch (a) {
+						case 2:
+							w = ~(this->alignedArr1[i] ^ 0xAAAAAAAA);
+							break;
+						case 1:
+							w = ~(this->alignedArr1[i] ^ 0x55555555);
+							break;
+						default:
+							w = ~(this->alignedArr1[i] ^ 0x00000000);
+						}
+						w >>= (32 - 2 * p0);
+						r = __builtin_popcountll((w & 0x55555555) & ((w & 0xAAAAAAAA) >> 1));
+					}
+					saValues[counter++] = this->getSAValue_32(this->alignedArr2[c + a] + r) + 1;
+					r = 0;
+				}
+			}
+			if (counter == seqLen) break;
+		}
+		if (counter == seqLen) break;
+		p = 0;
+	}
+}
+
+void FBCSA::getSAValuesSeq_64(unsigned int i, unsigned int seqLen, unsigned int *saValues) {
+        unsigned int startBlock = (i / 64) * 7;
+	unsigned int endBlock = ((i + seqLen) / 64) * 7;
+	unsigned int p = i % 64;
+	unsigned int c, counter = 0;
+	unsigned long long arr1Long1, arr1Long2, w = 0;
+
+	for (unsigned int i = startBlock; i <= endBlock; i = i + 7) {
+		c = this->alignedArr1[i + 6];
+		int r = 0;
+		unsigned long long b = (((unsigned long long)this->alignedArr1[i + 4]) << 32) + this->alignedArr1[i + 5];
+		for (unsigned int p0 = p; p0 < 64; ++p0) {
+			if (((b >> (64 - p0 - 1)) & 1) == 1) {
+				if (p0 > 0) r = __builtin_popcountll(b >> (64 - p0));
+				saValues[counter++] = this->alignedArr2[c + 3 + r];
+			}
+			else {
+				arr1Long1 = (((unsigned long long)this->alignedArr1[i]) << 32) + this->alignedArr1[i + 1];
+				if (p0 > 31) {
+					int t = p0 - 32;
+					arr1Long2 = (((unsigned long long)this->alignedArr1[i + 2]) << 32) + this->alignedArr1[i + 3];
+					unsigned int a = (arr1Long2 >> (64 - 2 * t - 2)) & 3;
+					switch (a) {
+					case 2:
+						w = ~(arr1Long1 ^ 0xAAAAAAAAAAAAAAAA);
+						break;
+					case 1:
+						w = ~(arr1Long1 ^ 0x5555555555555555);
+						break;
+					default:
+						w = ~(arr1Long1 ^ 0x0000000000000000);
+					}
+					r = __builtin_popcountll((w & 0x5555555555555555) & ((w & 0xAAAAAAAAAAAAAAAA) >> 1));
+					if (t > 0) {
+						switch (a) {
+						case 2:
+							w = ~(arr1Long2 ^ 0xAAAAAAAAAAAAAAAA);
+							break;
+						case 1:
+							w = ~(arr1Long2 ^ 0x5555555555555555);
+							break;
+						default:
+							w = ~(arr1Long2 ^ 0x0000000000000000);
+						}
+						w >>= (64 - 2 * t);
+						r += __builtin_popcountll((w & 0x5555555555555555) & ((w & 0xAAAAAAAAAAAAAAAA) >> 1));
+					}
+					saValues[counter++] = this->getSAValue_64(this->alignedArr2[c + a] + r) + 1;
+				}
+				else {
+					unsigned int a = (arr1Long1 >> (64 - 2 * p0 - 2)) & 3;
+					if (p0 > 0) {
+						switch (a) {
+						case 2:
+							w = ~(arr1Long1 ^ 0xAAAAAAAAAAAAAAAA);
+							break;
+						case 1:
+							w = ~(arr1Long1 ^ 0x5555555555555555);
+							break;
+						default:
+							w = ~(arr1Long1 ^ 0x0000000000000000);
+						}
+						w >>= (64 - 2 * p0);
+						r = __builtin_popcountll((w & 0x5555555555555555) & ((w & 0xAAAAAAAAAAAAAAAA) >> 1));
+					}
+					saValues[counter++] = this->getSAValue_64(this->alignedArr2[c + a] + r) + 1;
+				}
+				r = 0;
+			}
+			if (counter == seqLen) break;
+		}
+		if (counter == seqLen) break;
+		p = 0;
+	}
+}
+
+void FBCSA::getSAValuesSeq_general(unsigned int i, unsigned int seqLen, unsigned int *saValues) {
+        unsigned int bT = (this->bs / 16) + (this->bs / 32) + 1;
+	unsigned int startBlock = (i / this->bs) * bT;
+	unsigned int endBlock = ((i + seqLen) / this->bs) * bT;
+	unsigned int p = i % this->bs;
+	unsigned int b, c, w = 0, counter = 0;
+
+	for (unsigned int i = startBlock; i <= endBlock; i = i + bT) {
+		long long offSetInd = -1;
+		c = this->alignedArr1[i + (this->bs / 16) + (this->bs / 32)];
+		int r = 0;
+		for (unsigned int p0 = p; p0 < this->bs; ++p0) {
+			unsigned int d0 = p0 / 32;
+			unsigned int p1 = p0 % 32;
+			b = this->alignedArr1[i + (this->bs / 16) + d0];
+			if (((b >> (32 - p1 - 1)) & 1) == 1) {
+				if (offSetInd == -1) {
+					for (unsigned int k = 0; k < d0; ++k) {
+						r += __builtin_popcountll(this->alignedArr1[i + (this->bs / 16) + k]);
+					}
+					if (p1 > 0) r += __builtin_popcountll(b >> (32 - p1));
+					offSetInd = c + 3 + r;
+					r = 0;
+				}
+				else {
+					++offSetInd;
+				}
+				saValues[counter++] = this->alignedArr2[offSetInd];
+			}
+			else {
+				unsigned int d1 = p0 / 16;
+				unsigned int d2 = d1 * 16;
+				unsigned int a = (this->alignedArr1[i + d1] >> (32 - 2 * (p0 - d2) - 2)) & 3;
+				for (unsigned int k = 0; k < d1; ++k) {
+					switch (a) {
+					case 2:
+						w = ~(this->alignedArr1[i + k] ^ 0xAAAAAAAA);
+						break;
+					case 1:
+						w = ~(this->alignedArr1[i + k] ^ 0x55555555);
+						break;
+					default:
+						w = ~(this->alignedArr1[i + k] ^ 0x00000000);
+					}
+					r += __builtin_popcountll((w & 0x55555555) & ((w & 0xAAAAAAAA) >> 1));
+				}
+				if (p0 - d2 > 0) {
+					switch (a) {
+					case 2:
+						w = ~(this->alignedArr1[i + d1] ^ 0xAAAAAAAA);
+						break;
+					case 1:
+						w = ~(this->alignedArr1[i + d1] ^ 0x55555555);
+						break;
+					default:
+						w = ~(this->alignedArr1[i + d1] ^ 0x00000000);
+					}
+					w >>= (32 - 2 * (p0 - d2));
+					r += __builtin_popcountll((w & 0x55555555) & ((w & 0xAAAAAAAA) >> 1));
+				}
+				saValues[counter++] = this->getSAValue_general(this->alignedArr2[c + a] + r) + 1;
+				r = 0;
+			}
+			if (counter == seqLen) break;
+		}
+		if (counter == seqLen) break;
+		p = 0;
+	}
+}
+
 void FBCSA::binarySearchAStrcmp(unsigned int lStart, unsigned int rStart, unsigned char *pattern, int patternLength, unsigned int &beg, unsigned int &end) {
 	unsigned int l = lStart;
 	unsigned int r = rStart;
@@ -483,6 +714,14 @@ unsigned int FBCSA::count(unsigned char *pattern, unsigned int patternLen) {
 
 unsigned int *FBCSA::locate(unsigned char *pattern, unsigned int patternLen) {
 	return 0;
+}
+
+unsigned int FBCSA::extract(unsigned int i) {
+        return (this->*getSAValue)(i);
+}
+
+void FBCSA::extractSeq(unsigned int i, unsigned int seqLen, unsigned int *saValues) {
+        return (this->*getSAValuesSeq)(i, seqLen, saValues);
 }
 
 void FBCSA::save(const char *fileName) {
@@ -662,12 +901,15 @@ void FBCSALut2::setFunctions() {
         switch (this->bs) {
         case 32:
                this->getSAValue = &this->getSAValue_32;
+               this->getSAValuesSeq = &this->getSAValuesSeq_32;
                break;
         case 64:
                this->getSAValue = &this->getSAValue_64;
+               this->getSAValuesSeq = &this->getSAValuesSeq_64;
                break;
         default:
                this->getSAValue = &this->getSAValue_general;
+               this->getSAValuesSeq = &this->getSAValuesSeq_general;
                break; 
         }
 }

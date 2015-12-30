@@ -28,6 +28,7 @@ protected:
         unsigned int ss;
 
         unsigned int (FBCSA::*getSAValue)(unsigned int i) = NULL;
+        void (FBCSA::*getSAValuesSeq)(unsigned int i, unsigned int seqLen, unsigned int *saValues) = NULL;
 	unsigned int (FBCSA::*countOperation)(unsigned char *, unsigned int) = NULL;
         void (FBCSA::*getBoundariesOperation)(unsigned char *, unsigned int &, unsigned int &) = NULL;
 
@@ -43,6 +44,9 @@ protected:
         unsigned int getSAValue_32(unsigned int i);
         unsigned int getSAValue_64(unsigned int i);
         unsigned int getSAValue_general(unsigned int i);
+        void getSAValuesSeq_32(unsigned int i, unsigned int seqLen, unsigned int *saValues);
+        void getSAValuesSeq_64(unsigned int i, unsigned int seqLen, unsigned int *saValues);
+        void getSAValuesSeq_general(unsigned int i, unsigned int seqLen, unsigned int *saValues);
         void binarySearchAStrcmp(unsigned int lStart, unsigned int rStart, unsigned char *pattern, int patternLength, unsigned int &beg, unsigned int &end);
         void binarySearchStrncmp(unsigned int lStart, unsigned int rStart, unsigned char *pattern, int patternLength, unsigned int &beg, unsigned int &end);
         unsigned int count_std(unsigned char *pattern, unsigned int patternLength);
@@ -88,6 +92,9 @@ public:
 
 	unsigned int count(unsigned char *pattern, unsigned int patternLen);
 	unsigned int *locate(unsigned char *pattern, unsigned int patternLen);
+        
+        unsigned int extract(unsigned int i);
+        void extractSeq(unsigned int i, unsigned int seqLen, unsigned int *saValues);
         
         const static unsigned int encodedCharsNum;
 };

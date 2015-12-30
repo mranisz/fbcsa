@@ -75,7 +75,7 @@ FBCSA(unsigned int bs, unsigned int ss);
 ```
 
 ##FBCSA-hash
-SamSAMi1-hash is SamSAMi1 with hashed k-symbol prefixes of suffixes from sampled suffix array to speed up searches (k ≥ 2). This variant is particularly efficient in speed for short patterns (not much longer than max(q, k + q - p)).
+FBCSA-hash is FBCSA with hashed k-symbol prefixes of suffix array suffixes to speed up searches (k ≥ 2). This variant is particularly efficient in speed for short patterns (not much longer than k).
 
 Parameters:
 - bs - block size, must be a multiple of 32 (default: bs = 32)
