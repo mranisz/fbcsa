@@ -897,23 +897,6 @@ void FBCSA::getBoundaries(unsigned char *pattern, unsigned int &leftBoundary, un
 
 /*FBCSALut2*/
 
-void FBCSALut2::setFunctions() {
-        switch (this->bs) {
-        case 32:
-               this->getSAValue = &this->getSAValue_32;
-               this->getSAValuesSeq = &this->getSAValuesSeq_32;
-               break;
-        case 64:
-               this->getSAValue = &this->getSAValue_64;
-               this->getSAValuesSeq = &this->getSAValuesSeq_64;
-               break;
-        default:
-               this->getSAValue = &this->getSAValue_general;
-               this->getSAValuesSeq = &this->getSAValuesSeq_general;
-               break; 
-        }
-}
-
 void FBCSALut2::build(unsigned char* text, unsigned int textLen) {
 	checkNullChar(text, textLen);
 	this->free();

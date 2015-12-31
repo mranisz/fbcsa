@@ -105,10 +105,6 @@ class FBCSALut2 : public FBCSA {
 private:
         alignas(128) unsigned int lut2[256][256][2];
         
-        unsigned int (FBCSALut2::*countOperation)(unsigned char *, unsigned int) = NULL;
-        
-        void setFunctions();
-        
 public:
 	FBCSALut2() {
 		this->initialize();
