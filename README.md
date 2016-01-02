@@ -3,7 +3,7 @@
 ##What is it?
 FBCSA (Fixed Block based Compact Suffix Array) is a compact text index, with space use of about 1.5n - 2.5n bytes (+1n bytes for the indexed text), depending on the indexed text characteristics and two construction-time parameters: block size and sampling step, which allows for relatively fast pattern search and access to an arbitrary T[i] symbol.
 
-The current version handles only the count query (i.e., returns the number of occurrences of the given pattern) and the extract query (i.e., return the starting position of the i-th smallest suffix in text).
+The current version handles only the count query (i.e., returns the number of occurrences of the given pattern) and the extract query (i.e., returns the starting position of the i-th smallest suffix in text).
 
 ##Requirements
 The FBCSA text indexes require:
