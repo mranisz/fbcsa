@@ -91,7 +91,7 @@ Parameters:
 - loadFactor - hash table load factor (0.0 < loadFactor < 1.0)
 
 Limitations: 
-- pattern length >= k (patterns shorter than k are handled by standard variant of FBCSA index)
+- pattern length ≥ k (patterns shorter than k are handled by standard variant of FBCSA index)
 
 Constructors:
 ```
@@ -106,7 +106,7 @@ Parameters:
 - ss - sampling step (default: ss = 5)
 
 Limitations: 
-- pattern length >= 2 (patterns shorter than 2 are handled by standard variant of FBCSA index)
+- pattern length ≥ 2 (patterns shorter than 2 are handled by standard variant of FBCSA index)
 
 Constructors:
 ```

@@ -194,7 +194,7 @@ void FBCSA::build(unsigned char* text, unsigned int textLen) {
 	this->free();
         if (this->verbose) cout << "Loading text ... " << flush;
 	this->textLen = textLen;
-        this->text = new unsigned char [this->textLen + 128 + 1];
+        this->text = new unsigned char[this->textLen + 128 + 1];
         this->alignedText = this->text;
         while ((unsigned long long)this->alignedText % 128) ++this->alignedText;
         for (unsigned int i = 0; i < this->textLen; ++i) this->alignedText[i] = text[i];
@@ -902,7 +902,7 @@ void FBCSALut2::build(unsigned char* text, unsigned int textLen) {
 	this->free();
         if (this->verbose) cout << "Loading text ... " << flush;
 	this->textLen = textLen;
-        this->text = new unsigned char [this->textLen + 128 + 1];
+        this->text = new unsigned char[this->textLen + 128 + 1];
         this->alignedText = this->text;
         while ((unsigned long long)this->alignedText % 128) ++this->alignedText;
         for (unsigned int i = 0; i < this->textLen; ++i) this->alignedText[i] = text[i];
