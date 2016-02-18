@@ -21,9 +21,9 @@ void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor,
 
 void getUsage(char **argv) {
 	cout << "Select index you want to test:" << endl;
-	cout << "FBCSA: ./" << argv[0] << " std bs ss fileName patternNum patternLen" << endl;
-        cout << "FBCSA-LUT2: ./" << argv[0] << " lut2 bs ss fileName patternNum patternLen" << endl;
-        cout << "FBCSA-hash: ./" << argv[0] << " std bs ss hash|hash-dense k loadFactor fileName patternNum patternLen" << endl;
+	cout << "FBCSA: " << argv[0] << " std bs ss fileName patternNum patternLen" << endl;
+        cout << "FBCSA-LUT2: " << argv[0] << " lut2 bs ss fileName patternNum patternLen" << endl;
+        cout << "FBCSA-hash: " << argv[0] << " std bs ss hash|hash-dense k loadFactor fileName patternNum patternLen" << endl;
         cout << "where:" << endl;
         cout << "bs - block size (must be a multiple of 32)" << endl;
 	cout << "ss - sampling step" << endl;

@@ -16,7 +16,7 @@ void fbcsaExtract(string bs, string ss, const char *textFileName, unsigned int s
 
 void getUsage(char **argv) {
 	cout << "Syntax:" << endl;
-	cout << "./" << argv[0] << " bs ss fileName seqNum seqLen" << endl;
+	cout << argv[0] << " bs ss fileName seqNum seqLen" << endl;
         cout << "where:" << endl;
         cout << "bs - block size (must be a multiple of 32)" << endl;
 	cout << "ss - sampling step" << endl;
