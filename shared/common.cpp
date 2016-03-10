@@ -165,7 +165,7 @@ void fillArrayC(unsigned char *text, unsigned int textLen, unsigned int* C, bool
 	for (unsigned int i = 0; i < textLen; ++i) {
 		++C[text[i] + 1];
 	}
-	C[0] = 1;
+	C[1] = 1;
 	for (int i = 0; i < 256; ++i) {
 		C[i + 1] += C[i];
 	}
