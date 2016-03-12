@@ -82,8 +82,8 @@ FBCSA(unsigned int bs, unsigned int ss);
 FBCSA-hash is FBCSA with hashed k-symbol prefixes of suffix array suffixes to speed up searches (k ≥ 2). This variant is particularly efficient in speed for short patterns (not much longer than k).
 
 Parameters:
-- bs - block size, must be a multiple of 32 (default: bs = 32)
-- ss - sampling step (default: ss = 5)
+- bs - block size, must be a multiple of 32
+- ss - sampling step
 - hash type:
       - HT::STANDARD - using 8 bytes for each hashed entry: 4 bytes for left boundary + 4 bytes for right boundary
       - HT::DENSE - using 6 bytes for each hashed entry: 4 bytes for left boundary + 2 bytes for right boundary
