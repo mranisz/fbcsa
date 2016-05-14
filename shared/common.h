@@ -22,6 +22,7 @@ FILE *openFile(const char *inFileName, int elemSize, unsigned int &len);
 unsigned char *readFileChar(const char *inFileName, unsigned int &len, unsigned int addLen);
 unsigned int *readFileInt(const char *inFileName, unsigned int &len, unsigned int addLen);
 unsigned long long *readFileLong(const char *inFileName, unsigned int &len, unsigned int addLen);
+unsigned char **readFilePatterns(const char *inFileName, unsigned int m, unsigned int queriesNum);
 bool fileExists(const char *inFileName);
 unsigned char *readText(const char *inFileName, unsigned int &textLen, unsigned char eof);
 void checkNullChar(unsigned char *text, unsigned int textLen);

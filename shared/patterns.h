@@ -15,12 +15,15 @@ private:
 	vector<unsigned char> selectedChars;
 	unsigned char **patterns;
 	unsigned int *counts = NULL;
+        vector<unsigned int> *locates = NULL;
 
 	void initialize();
 	void freeMemory();
 	void initializePatterns();
 	void initializeSACounts();
+        void initializeSALocates();
 	unsigned int getSACount(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength);
+        void getSALocate(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength, vector<unsigned int>& res);
 	void setSelectedChars(vector<unsigned char> selectedChars);
 
 public:
@@ -36,7 +39,9 @@ public:
 	}
 	unsigned char **getPatterns();
 	unsigned int *getSACounts();
+        vector<unsigned int> *getSALocates();
 	unsigned int getErrorCountsNumber(unsigned int *countsToCheck);
+        unsigned int getErrorLocatesNumber(vector<unsigned int> *locatesToCheck);
 };
 
 }

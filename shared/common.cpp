@@ -87,6 +87,26 @@ unsigned long long *readFileLong(const char *inFileName, unsigned int &len, unsi
 	return S;
 }
 
+unsigned char **readFilePatterns(const char *inFileName, unsigned int m, unsigned int queriesNum) {
+        unsigned int len = 0;
+        FILE *InFile = openFile(inFileName, 1, len);
+        if (len != m * queriesNum) {
+            cout << "Error reading file " << inFileName << endl;
+            exit(1);
+        }
+	unsigned char **patterns = new unsigned char *[queriesNum];
+        for (unsigned int i = 0; i < queriesNum; ++i) {
+                patterns[i] = new unsigned char[m + 1];
+                patterns[i][m] = '\0';
+                if (fread(patterns[i], (size_t)sizeof(unsigned char), (size_t)m, InFile) != (size_t)m) {
+                        cout << "Error reading file " << inFileName << endl;
+                        exit(1);
+                }
+        }
+	fclose(InFile);
+	return patterns;
+}
+
 bool fileExists(const char *inFileName) {
 	FILE *InFile;
 	InFile = fopen(inFileName, "rb");
