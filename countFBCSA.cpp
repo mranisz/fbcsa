@@ -20,7 +20,7 @@ void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int quer
 void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m);
 
 void getUsage(char **argv) {
-	cout << "Select index you want to test:" << endl;
+	cout << "Select index you want to test (count):" << endl;
 	cout << "FBCSA: " << argv[0] << " std bs ss fileName patternNum patternLen" << endl;
         cout << "FBCSA-LUT2: " << argv[0] << " lut2 bs ss fileName patternNum patternLen" << endl;
         cout << "FBCSA-hash: " << argv[0] << " std bs ss hash|hash-dense k loadFactor fileName patternNum patternLen" << endl;

@@ -45,6 +45,7 @@ void FBCSA::setFunctions() {
         }
 	if (this->ht != NULL) {
                 this->countOperation = &FBCSA::count_hash;
+                this->locateOperation = &FBCSA::locate_hash;
                 switch(this->ht->type) {
                 case HT::STANDARD:
                     this->getBoundariesOperation = &FBCSA::getStandardHTBoundaries;
@@ -55,6 +56,7 @@ void FBCSA::setFunctions() {
                 }
 	} else {
                 this->countOperation = &FBCSA::count_std;
+                this->locateOperation = &FBCSA::locate_std;
 	}
 }
 
@@ -420,6 +422,7 @@ void FBCSA::getSAValuesSeq_32(unsigned int i, unsigned int seqLen, unsigned int 
 		c = this->alignedArr1[i + 3];
 		unsigned int r = 0;
 		for (unsigned int p0 = p; p0 < 32; ++p0) {
+                        if (counter == seqLen) break;
 			if (((b >> (32 - p0 - 1)) & 1) == 1) {
 				if (offSetInd == -1) {
 					if (p0 > 0) r = __builtin_popcountll(b >> (32 - p0));
@@ -483,7 +486,6 @@ void FBCSA::getSAValuesSeq_32(unsigned int i, unsigned int seqLen, unsigned int 
 					r = 0;
 				}
 			}
-			if (counter == seqLen) break;
 		}
 		if (counter == seqLen) break;
 		p = 0;
@@ -502,6 +504,7 @@ void FBCSA::getSAValuesSeq_64(unsigned int i, unsigned int seqLen, unsigned int 
 		int r = 0;
 		unsigned long long b = (((unsigned long long)this->alignedArr1[i + 4]) << 32) + this->alignedArr1[i + 5];
 		for (unsigned int p0 = p; p0 < 64; ++p0) {
+                        if (counter == seqLen) break;
 			if (((b >> (64 - p0 - 1)) & 1) == 1) {
 				if (p0 > 0) r = __builtin_popcountll(b >> (64 - p0));
 				saValues[counter++] = this->alignedArr2[c + 3 + r];
@@ -559,7 +562,6 @@ void FBCSA::getSAValuesSeq_64(unsigned int i, unsigned int seqLen, unsigned int 
 				}
 				r = 0;
 			}
-			if (counter == seqLen) break;
 		}
 		if (counter == seqLen) break;
 		p = 0;
@@ -578,6 +580,7 @@ void FBCSA::getSAValuesSeq_general(unsigned int i, unsigned int seqLen, unsigned
 		c = this->alignedArr1[i + (this->bs / 16) + (this->bs / 32)];
 		int r = 0;
 		for (unsigned int p0 = p; p0 < this->bs; ++p0) {
+                        if (counter == seqLen) break;
 			unsigned int d0 = p0 / 32;
 			unsigned int p1 = p0 % 32;
 			b = this->alignedArr1[i + (this->bs / 16) + d0];
@@ -629,7 +632,6 @@ void FBCSA::getSAValuesSeq_general(unsigned int i, unsigned int seqLen, unsigned
 				saValues[counter++] = this->getSAValue_general(this->alignedArr2[c + a] + r) + 1;
 				r = 0;
 			}
-			if (counter == seqLen) break;
 		}
 		if (counter == seqLen) break;
 		p = 0;
@@ -708,12 +710,37 @@ unsigned int FBCSA::count_hash(unsigned char *pattern, unsigned int patternLengt
         return end - beg;
 }
 
+void FBCSA::locate_std(unsigned char *pattern, unsigned int patternLength, vector<unsigned int>& res) {
+	unsigned int beg, end;
+	if (pattern[patternLength - 1] == 255) this->binarySearchStrncmp(0, this->textLen + 1, pattern, patternLength, beg, end);
+	else this->binarySearchAStrcmp(0, this->textLen + 1, pattern, patternLength, beg, end);
+        unsigned int *saValues = new unsigned int[end - beg];
+        (this->*getSAValuesSeq)(beg, end - beg, saValues);
+        res.insert(res.end(), saValues, saValues + (end - beg));
+        delete[] saValues;
+}
+
+void FBCSA::locate_hash(unsigned char *pattern, unsigned int patternLength, vector<unsigned int>& res) {
+        if (patternLength < this->ht->k) {
+            this->locate_std(pattern, patternLength, res);
+            return;
+        }
+        unsigned int leftBoundary, rightBoundary, beg, end;
+        this->getBoundaries(pattern, leftBoundary, rightBoundary);
+        if (pattern[patternLength - 1] == 255) this->binarySearchStrncmp(leftBoundary, rightBoundary, pattern, patternLength, beg, end);
+        else this->binarySearchAStrcmp(leftBoundary, rightBoundary, pattern, patternLength, beg, end);
+        unsigned int *saValues = new unsigned int[end - beg];
+        (this->*getSAValuesSeq)(beg, end - beg, saValues);
+        res.insert(res.end(), saValues, saValues + (end - beg));
+        delete[] saValues;
+}
+
 unsigned int FBCSA::count(unsigned char *pattern, unsigned int patternLen) {
 	return (this->*countOperation)(pattern, patternLen);
 }
 
-unsigned int *FBCSA::locate(unsigned char *pattern, unsigned int patternLen) {
-	return 0;
+void FBCSA::locate(unsigned char* pattern, unsigned int patternLen, vector<unsigned int>& res) {
+	(this->*locateOperation)(pattern, patternLen, res);
 }
 
 unsigned int FBCSA::extract(unsigned int i) {
@@ -721,7 +748,7 @@ unsigned int FBCSA::extract(unsigned int i) {
 }
 
 void FBCSA::extractSeq(unsigned int i, unsigned int seqLen, unsigned int *saValues) {
-        return (this->*getSAValuesSeq)(i, seqLen, saValues);
+        (this->*getSAValuesSeq)(i, seqLen, saValues);
 }
 
 void FBCSA::save(const char *fileName) {
@@ -1032,8 +1059,22 @@ unsigned int FBCSALut2::count(unsigned char *pattern, unsigned int patternLen) {
 	} else return 0;
 }
 
-unsigned int *FBCSALut2::locate(unsigned char *pattern, unsigned int patternLen) {
-	return 0;
+void FBCSALut2::locate(unsigned char* pattern, unsigned int patternLen, vector<unsigned int>& res) {
+	if (patternLen < 2) {
+            this->locate_std(pattern, patternLen, res);
+            return;
+        }
+        unsigned int leftBoundaryLUT2 = this->lut2[pattern[0]][pattern[1]][0];
+	unsigned int rightBoundaryLUT2 = this->lut2[pattern[0]][pattern[1]][1];
+	if (leftBoundaryLUT2 < rightBoundaryLUT2) {
+                unsigned int beg, end;
+		if (pattern[patternLen - 1] == 255) this->binarySearchStrncmp(leftBoundaryLUT2, rightBoundaryLUT2, pattern, patternLen, beg, end);
+                else this->binarySearchAStrcmp(leftBoundaryLUT2, rightBoundaryLUT2, pattern, patternLen, beg, end);
+                unsigned int *saValues = new unsigned int[end - beg];
+                (this->*getSAValuesSeq)(beg, end - beg, saValues);
+                res.insert(res.end(), saValues, saValues + (end - beg));
+                delete[] saValues;
+	}
 }
 
 }

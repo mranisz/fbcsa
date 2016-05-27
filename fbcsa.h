@@ -27,9 +27,10 @@ protected:
         unsigned int bs;
         unsigned int ss;
 
-        unsigned int (FBCSA::*getSAValue)(unsigned int i) = NULL;
-        void (FBCSA::*getSAValuesSeq)(unsigned int i, unsigned int seqLen, unsigned int *saValues) = NULL;
+        unsigned int (FBCSA::*getSAValue)(unsigned int) = NULL;
+        void (FBCSA::*getSAValuesSeq)(unsigned int, unsigned int, unsigned int *) = NULL;
 	unsigned int (FBCSA::*countOperation)(unsigned char *, unsigned int) = NULL;
+        void (FBCSA::*locateOperation)(unsigned char *, unsigned int, vector<unsigned int> &) = NULL;
         void (FBCSA::*getBoundariesOperation)(unsigned char *, unsigned int &, unsigned int &) = NULL;
 
 	void freeMemory();
@@ -51,6 +52,8 @@ protected:
         void binarySearchStrncmp(unsigned int lStart, unsigned int rStart, unsigned char *pattern, int patternLength, unsigned int &beg, unsigned int &end);
         unsigned int count_std(unsigned char *pattern, unsigned int patternLength);
         unsigned int count_hash(unsigned char *pattern, unsigned int patternLength);
+        void locate_std(unsigned char* pattern, unsigned int patternLen, vector<unsigned int>& res);
+        void locate_hash(unsigned char* pattern, unsigned int patternLen, vector<unsigned int>& res);
         void getStandardHTBoundaries(unsigned char *pattern, unsigned int &leftBoundary, unsigned int &rightBoundary);
         void getDenseHTBoundaries(unsigned char *pattern, unsigned int &leftBoundary, unsigned int &rightBoundary);
         void getBoundaries(unsigned char *pattern, unsigned int &leftBoundary, unsigned int &rightBoundary);
@@ -91,7 +94,7 @@ public:
 	unsigned int getTextSize();
 
 	unsigned int count(unsigned char *pattern, unsigned int patternLen);
-	unsigned int *locate(unsigned char *pattern, unsigned int patternLen);
+	void locate(unsigned char* pattern, unsigned int patternLen, vector<unsigned int>& res);
         
         unsigned int extract(unsigned int i);
         void extractSeq(unsigned int i, unsigned int seqLen, unsigned int *saValues);
@@ -126,7 +129,7 @@ public:
         unsigned int getIndexSize();
         
         unsigned int count(unsigned char *pattern, unsigned int patternLen);
-	unsigned int *locate(unsigned char *pattern, unsigned int patternLen);
+	void locate(unsigned char* pattern, unsigned int patternLen, vector<unsigned int>& res);
 };
 
 }

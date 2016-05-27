@@ -3,8 +3,6 @@
 ##What is it?
 FBCSA (Fixed Block based Compact Suffix Array) is a compact text index, with space use of about 1.5n - 2.5n bytes (+1n bytes for the indexed text), depending on the indexed text characteristics and two construction-time parameters: block size and sampling step, which allows for relatively fast pattern search and access to an arbitrary T[i] symbol.
 
-The current version handles only the count query (i.e., returns the number of occurrences of the given pattern) and the extract query (i.e., returns the starting position of the i-th smallest suffix in text).
-
 ##Requirements
 The FBCSA text indexes require:
 - C++11 ready compiler such as g++ version 4.7 or higher
@@ -53,13 +51,17 @@ unsigned int getIndexSize();
 ```
 unsigned int getTextSize();
 ```
+- get the result of **extract** query:
+```
+unsigned int extract(unsigned int i);
+```
 - get the result of **count** query:
 ```
 unsigned int count(unsigned char *pattern, unsigned int patternLen);
 ```
-- get the result of **extract** query:
+- get the result of **locate** query:
 ```
-unsigned int extract(unsigned int i);
+void locate(unsigned char *pattern, unsigned int patternLen, vector<unsigned int>& res);
 ```
 - set **verbose** mode:
 ```
