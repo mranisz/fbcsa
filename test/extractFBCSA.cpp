@@ -2,10 +2,9 @@
 #include <fstream>
 #include <string>
 #include <stdlib.h>
-#include "shared/common.h"
-#include "shared/sakeys.h"
-#include "shared/timer.h"
-#include "fbcsa.h"
+#include "../shared/sakeys.h"
+#include "../shared/timer.h"
+#include "../fbcsa.h"
 
 using namespace std;
 using namespace fbcsa;
@@ -34,8 +33,6 @@ int main(int argc, char *argv[]) {
 }
 
 void fbcsaExtract(string bs, string ss, const char *textFileName, unsigned int seqNum, unsigned int seqLen) {
-        unsigned char* text = NULL;
-	unsigned int textLen;
 	FBCSA *fbcsa;
         string indexFileNameString = "FBCSA-" + (string)textFileName + "-" +  bs + "-" + ss + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
@@ -46,8 +43,7 @@ void fbcsaExtract(string bs, string ss, const char *textFileName, unsigned int s
 	} else {
 		fbcsa = new FBCSA(atoi(bs.c_str()), atoi(ss.c_str()));
 		fbcsa->setVerbose(true);
-		text = readText(textFileName, textLen, 0);
-		fbcsa->build(text, textLen);
+		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
 
@@ -85,7 +81,6 @@ void fbcsaExtract(string bs, string ss, const char *textFileName, unsigned int s
 	resultFile << endl;
 	resultFile.close();
 
-	if (text != NULL) delete[] text;
 	delete[] saValues;
 	delete fbcsa;
 	delete SAK;

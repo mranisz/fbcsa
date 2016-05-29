@@ -157,6 +157,53 @@ unsigned int *getSA(unsigned char *text, unsigned int textLen, unsigned int &saL
 	return sa;
 }
 
+unsigned int *getSA(const char *textFileName, unsigned int &saLen, unsigned int addLen, bool verbose) {
+        stringstream ss;
+	ss << "SA-" << textFileName << ".dat";
+	string s = ss.str();
+	char *saFileName = (char *)(s.c_str());
+        unsigned int *sa;
+        if (!fileExists(saFileName)) {
+                unsigned int textLen;
+		unsigned char *text = readFileChar(textFileName, textLen, 0);
+                sa = getSA(text, textLen, saLen, addLen, verbose);
+                delete[] text;
+                if (verbose) cout << "Saving SA in " << saFileName << " ... " << flush;
+                FILE *outFile;
+                outFile = fopen(saFileName, "w");
+                fwrite(sa, (size_t)(sizeof(unsigned int)), (size_t)saLen, outFile);
+                fclose(outFile);
+        } 
+        else {
+                if (verbose) cout << "Loading SA from " << saFileName << " ... " << flush;
+                sa = readFileInt(saFileName, saLen, addLen);
+        }
+        if (verbose) cout << "Done" << endl;
+        return sa;
+}
+
+unsigned int *getSA(const char *textFileName, unsigned char *text, unsigned int textLen, unsigned int &saLen, unsigned int addLen, bool verbose) {
+        stringstream ss;
+	ss << "SA-" << textFileName << ".dat";
+	string s = ss.str();
+	char *saFileName = (char *)(s.c_str());
+        unsigned int *sa;
+        if (!fileExists(saFileName)) {
+                sa = getSA(text, textLen, saLen, addLen, verbose);
+                if (verbose) cout << "Saving SA in " << saFileName << " ... " << flush;
+                FILE *outFile;
+                outFile = fopen(saFileName, "w");
+                fwrite(sa, (size_t)(sizeof(unsigned int)), (size_t)saLen, outFile);
+                fclose(outFile);
+        } 
+        else {
+                if (verbose) cout << "Loading SA from " << saFileName << " ... " << flush;
+                sa = readFileInt(saFileName, saLen, addLen);
+        }
+        if (verbose) cout << "Done" << endl;
+        return sa;
+}
+
 unsigned char *getBWT(unsigned char *text, unsigned int textLen, unsigned int *sa, unsigned int saLen, unsigned int &bwtLen, unsigned int addLen, bool verbose) {
 	if (verbose) cout << "Building BWT ... " << flush;
 	bwtLen = textLen + 1;
@@ -174,6 +221,14 @@ unsigned char *getBWT(unsigned char *text, unsigned int textLen, unsigned int *s
 unsigned char *getBWT(unsigned char *text, unsigned int textLen, unsigned int &bwtLen, unsigned int addLen, bool verbose) {
 	unsigned int saLen;
 	unsigned int *sa = getSA(text, textLen, saLen, 0, verbose);
+	unsigned char *bwt = getBWT(text, textLen, sa, saLen, bwtLen, addLen, verbose);
+	delete[] sa;
+	return bwt;
+}
+
+unsigned char *getBWT(const char *textFileName, unsigned char *text, unsigned int textLen, unsigned int &bwtLen, unsigned int addLen, bool verbose) {
+	unsigned int saLen;
+	unsigned int *sa = getSA(textFileName, text, textLen, saLen, 0, verbose);
 	unsigned char *bwt = getBWT(text, textLen, sa, saLen, bwtLen, addLen, verbose);
 	delete[] sa;
 	return bwt;

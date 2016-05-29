@@ -55,12 +55,11 @@ void SAKeys::initializeSAValues() {
 	char *saValuesFileName = (char *)(s.c_str());
 
 	if (!fileExists(saValuesFileName)) {
-		unsigned int textLen;
+                unsigned int textLen;
 		unsigned char *text = readFileChar(this->textFileName, textLen, 0);
-
 		unsigned int saLen;
-		unsigned int *sa = getSA(text, textLen, saLen, 0, true);
-
+		unsigned int *sa = getSA(this->textFileName, text, textLen, saLen, 0, true);
+                
 		cout << "Getting SA values (sequence length = " << this->seqLen << ") from SA ... " << flush;
 		this->saValues = new unsigned int[this->queriesNum * this->seqLen];
 		for (unsigned int i = 0; i < this->queriesNum; ++i) {

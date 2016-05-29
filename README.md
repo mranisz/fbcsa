@@ -27,9 +27,9 @@ To use the FBCSA library:
 
 ##API
 There are several functions you can call on each of the FBCSA text index:
-- **build** the index using the text:
+- **build** the index using text file called textFileName:
 ```
-void build(unsigned char* text, unsigned int textLen);
+void build(const char *textFileName);
 ```
 - **save** the index to file called fileName:
 ```
@@ -120,7 +120,6 @@ FBCSALut2(unsigned int bs, unsigned int ss);
 ```
 #include <iostream>
 #include <stdlib.h>
-#include "fbcsa/shared/common.h"
 #include "fbcsa/shared/patterns.h"
 #include "fbcsa/fbcsa.h"
 
@@ -131,8 +130,6 @@ int main(int argc, char *argv[]) {
 
 	unsigned int queriesNum = 1000000;
 	unsigned int patternLen = 20;
-	unsigned char* text = NULL;
-	unsigned int textLen;
 	FBCSA *fbcsa;
 	const char *textFileName = "english";
 	const char *indexFileName = "english-fbcsa.idx";
@@ -143,8 +140,7 @@ int main(int argc, char *argv[]) {
 	} else {
 		fbcsa = new FBCSA();
 		fbcsa->setVerbose(true);
-		text = readText(textFileName, textLen, 0);
-		fbcsa->build(text, textLen);
+		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
 
@@ -158,7 +154,6 @@ int main(int argc, char *argv[]) {
 		cout << "Pattern |" << patterns[i] << "| occurs " << fbcsa->count(patterns[i], patternLen) << " times." << endl;
 	}
 
-	if (text != NULL) delete[] text;
 	delete fbcsa;
 	delete P;
 }

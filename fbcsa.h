@@ -38,6 +38,7 @@ protected:
         void setBs(unsigned int bs);
         void setSs(unsigned int ss);
 	void setFunctions();
+        void loadText(const char *textFileName);
         string getMostCommonCharsInBlock(unsigned char *block);
         unsigned int getArr2LenForBlock(unsigned char *bwtStart, unsigned int *saStart, unsigned int *saInv);
         void buildArraysForBlock(unsigned char *bwtStart, unsigned int *saStart, unsigned int *saInv, unsigned int &arr1Index, unsigned int &arr2Index);
@@ -86,7 +87,7 @@ public:
                 if (this->ht != NULL) delete this->ht;
 	}
 
-	void build(unsigned char *text, unsigned int textLen);
+	void build(const char *textFileName);
 	void save(const char *fileName);
 	void load(const char *fileName);
 	void free();
@@ -123,7 +124,7 @@ public:
 		this->setFunctions();
 	}
         
-        void build(unsigned char *text, unsigned int textLen);
+        void build(const char *textFileName);
         void save(const char *fileName);
 	void load(const char *fileName);
         unsigned int getIndexSize();

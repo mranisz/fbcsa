@@ -67,7 +67,7 @@ void Patterns::initializePatterns() {
 		cout << "Saving patterns in " << patternFileName << " ... " << flush;
 		FILE *outFile;
 		outFile = fopen(patternFileName, "w");
-		fwrite(queriesFirstIndexArray, (size_t)4, (size_t)(this->queriesNum), outFile);
+		fwrite(queriesFirstIndexArray, (size_t)(sizeof(unsigned int)), (size_t)(this->queriesNum), outFile);
 		fclose(outFile);
 		cout << "Done" << endl;
 	} else {
@@ -95,11 +95,10 @@ void Patterns::initializeSACounts() {
 	char *countsFileName = (char *)(s.c_str());
 
 	if (!fileExists(countsFileName)) {
-		unsigned int textLen;
+                unsigned int textLen;
 		unsigned char *text = readFileChar(this->textFileName, textLen, 0);
-
-		unsigned int saLen;
-		unsigned int *sa = getSA(text, textLen, saLen, 0, true);
+                unsigned int saLen;
+		unsigned int *sa = getSA(this->textFileName, text, textLen, saLen, 0, true);
 
 		cout << "Getting counts from SA ... " << flush;
 		this->counts = new unsigned int[this->queriesNum];
@@ -112,7 +111,7 @@ void Patterns::initializeSACounts() {
 		cout << "Saving counts in " << countsFileName << " ... " << flush;
 		FILE *outFile;
 		outFile = fopen(countsFileName, "w");
-		fwrite(this->counts, (size_t)4, (size_t)(this->queriesNum), outFile);
+		fwrite(this->counts, (size_t)(sizeof(unsigned int)), (size_t)(this->queriesNum), outFile);
 		fclose(outFile);
 		cout << "Done" << endl;
 
@@ -131,14 +130,12 @@ void Patterns::initializeSALocates() {
 	char *locatesFileName = (char *)(s.c_str());
 
 	if (!fileExists(locatesFileName)) {
-		unsigned int textLen;
+                unsigned int textLen;
 		unsigned char *text = readFileChar(this->textFileName, textLen, 0);
-
 		unsigned int saLen;
-		unsigned int *sa = getSA(text, textLen, saLen, 0, true);
+		unsigned int *sa = getSA(this->textFileName, text, textLen, saLen, 0, true);
                 
                 unsigned long long counter = 0;
-
 		cout << "Getting locates from SA ... " << flush;
 		this->locates = new vector<unsigned int>[this->queriesNum];
 		for (unsigned int i = 0; i < this->queriesNum; ++i) {
@@ -157,9 +154,9 @@ void Patterns::initializeSALocates() {
                 unsigned int locateSize;
                 for (unsigned int i = 0; i < this->queriesNum; ++i) {
                     locateSize = this->locates[i].size();
-                    fwrite(&locateSize, (size_t)4, (size_t)1, outFile);
+                    fwrite(&locateSize, (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
                     for(vector<unsigned int>::iterator it = this->locates[i].begin(); it != this->locates[i].end(); ++it) {
-                        fwrite(&(*it), (size_t)4, (size_t)1, outFile);
+                        fwrite(&(*it), (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
                     }
                 }
 		fclose(outFile);
@@ -173,13 +170,13 @@ void Patterns::initializeSALocates() {
 		inFile = fopen(locatesFileName, "rb");
                 this->locates = new vector<unsigned int>[this->queriesNum];
 		for (unsigned int i = 0; i < this->queriesNum; ++i) {
-                    result = fread(&locateSize, (size_t)4, (size_t)1, inFile);
+                    result = fread(&locateSize, (size_t)(sizeof(unsigned int)), (size_t)1, inFile);
                     if (result != 1) {
                             cout << "Error reading file " << locatesFileName << endl;
                             exit(1);
                     }
                     for (unsigned int j = 0; j < locateSize; ++j) {
-                            result = fread(&locateValue, (size_t)4, (size_t)1, inFile);
+                            result = fread(&locateValue, (size_t)(sizeof(unsigned int)), (size_t)1, inFile);
                             if (result != 1) {
                                     cout << "Error reading file " << locatesFileName << endl;
                                     exit(1);

@@ -191,20 +191,31 @@ void FBCSA::buildIndex(unsigned int *sa, unsigned int saLen) {
         delete[] bwt;
 }
 
-void FBCSA::build(unsigned char* text, unsigned int textLen) {
-	checkNullChar(text, textLen);
-	this->free();
+void FBCSA::loadText(const char *textFileName) {
         if (this->verbose) cout << "Loading text ... " << flush;
-	this->textLen = textLen;
+        this->textLen = getFileSize(textFileName, sizeof(unsigned char));
         this->text = new unsigned char[this->textLen + 128 + 1];
         this->alignedText = this->text;
         while ((unsigned long long)this->alignedText % 128) ++this->alignedText;
-        for (unsigned int i = 0; i < this->textLen; ++i) this->alignedText[i] = text[i];
+        FILE *inFile;
+	inFile = fopen(textFileName, "rb");
+        size_t result = fread(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, inFile);
         this->alignedText[this->textLen] = '\0';
+        if (result != this->textLen) {
+                cout << "Error loading text from " << textFileName << endl;
+                exit(1);
+        }
+        fclose(inFile);
+        checkNullChar(this->alignedText, this->textLen);
         if (this->verbose) cout << "Done" << endl;
+}
+
+void FBCSA::build(const char *textFileName) {
+        this->free();
+        this->loadText(textFileName);
         
         unsigned int saLen;
-        unsigned int *sa = getSA(this->alignedText, this->textLen, saLen, this->bs - ((this->textLen + 1) % this->bs), this->verbose);
+        unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, this->bs - ((this->textLen + 1) % this->bs), this->verbose);
         
         this->buildIndex(sa, saLen);
         
@@ -924,20 +935,12 @@ void FBCSA::getBoundaries(unsigned char *pattern, unsigned int &leftBoundary, un
 
 /*FBCSALut2*/
 
-void FBCSALut2::build(unsigned char* text, unsigned int textLen) {
-	checkNullChar(text, textLen);
+void FBCSALut2::build(const char *textFileName) {
 	this->free();
-        if (this->verbose) cout << "Loading text ... " << flush;
-	this->textLen = textLen;
-        this->text = new unsigned char[this->textLen + 128 + 1];
-        this->alignedText = this->text;
-        while ((unsigned long long)this->alignedText % 128) ++this->alignedText;
-        for (unsigned int i = 0; i < this->textLen; ++i) this->alignedText[i] = text[i];
-        this->alignedText[this->textLen] = '\0';
-        if (this->verbose) cout << "Done" << endl;
+        this->loadText(textFileName);
         
         unsigned int saLen;
-        unsigned int *sa = getSA(this->alignedText, this->textLen, saLen, this->bs - ((this->textLen + 1) % this->bs), this->verbose);
+        unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, this->bs - ((this->textLen + 1) % this->bs), this->verbose);
         
         this->buildIndex(sa, saLen);
         
