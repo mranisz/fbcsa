@@ -10,10 +10,6 @@
 
 namespace fbcsa {
 
-void Patterns::initialize() {
-	this->initializePatterns();
-}
-
 void Patterns::initializePatterns() {
 	unsigned int textLen, queriesFirstIndexArrayLen;
 	unsigned char *text = readFileChar(this->textFileName, textLen, 0);
@@ -89,6 +85,7 @@ void Patterns::initializePatterns() {
 }
 
 void Patterns::initializeSACounts() {
+        if (this->patterns == NULL) this->initializePatterns();
 	stringstream ss;
 	ss << "counts-" << this->textFileName << "-" << this->m << "-" << this->queriesNum << "-" << getStringFromSelectedChars(this->selectedChars, ".") << ".dat";
 	string s = ss.str();
@@ -124,6 +121,7 @@ void Patterns::initializeSACounts() {
 }
 
 void Patterns::initializeSALocates() {
+        if (this->patterns == NULL) this->initializePatterns();
 	stringstream ss;
 	ss << "locates-" << this->textFileName << "-" << this->m << "-" << this->queriesNum << "-" << getStringFromSelectedChars(this->selectedChars, ".") << ".dat";
 	string s = ss.str();
@@ -212,6 +210,7 @@ void Patterns::getSALocate(unsigned int *sa, unsigned char *text, unsigned int s
 }
 
 unsigned char **Patterns::getPatterns() {
+        if (this->patterns == NULL) this->initializePatterns();
 	return this->patterns;
 }
 

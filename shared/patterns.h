@@ -13,11 +13,10 @@ private:
 	unsigned int queriesNum;
 	unsigned int m;
 	vector<unsigned char> selectedChars;
-	unsigned char **patterns;
+	unsigned char **patterns = NULL;
 	unsigned int *counts = NULL;
         vector<unsigned int> *locates = NULL;
 
-	void initialize();
 	void freeMemory();
 	void initializePatterns();
 	void initializeSACounts();
@@ -32,7 +31,6 @@ public:
 		this->queriesNum = queriesNum;
 		this->m = m;
 		this->setSelectedChars(selectedChars);
-		this->initialize();
 	}
 	~Patterns() {
 		this->freeMemory();
