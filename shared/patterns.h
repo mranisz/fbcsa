@@ -18,6 +18,8 @@ private:
         vector<unsigned int> *locates = NULL;
 
 	void freeMemory();
+        void setQueriesNum(unsigned int queriesNum);
+        void setM(unsigned int m);
 	void initializePatterns();
 	void initializeSACounts();
         void initializeSALocates();
@@ -28,8 +30,8 @@ private:
 public:
 	Patterns(const char *textFileName, unsigned int queriesNum, unsigned int m, vector<unsigned char> selectedChars = {}) {
 		this->textFileName = textFileName;
-		this->queriesNum = queriesNum;
-		this->m = m;
+		this->setQueriesNum(queriesNum);
+		this->setM(m);
 		this->setSelectedChars(selectedChars);
 	}
 	~Patterns() {
@@ -38,6 +40,34 @@ public:
 	unsigned char **getPatterns();
 	unsigned int *getSACounts();
         vector<unsigned int> *getSALocates();
+	unsigned int getErrorCountsNumber(unsigned int *countsToCheck);
+        unsigned int getErrorLocatesNumber(vector<unsigned int> *locatesToCheck);
+};
+
+class NegativePatterns {
+private:
+	const char *textFileName;
+	unsigned int queriesNum;
+	unsigned int m;
+	unsigned char **patterns = NULL;
+
+	void freeMemory();
+        void setQueriesNum(unsigned int queriesNum);
+        void setM(unsigned int m);
+	void initializePatterns();
+	void setSelectedChars(vector<unsigned char> selectedChars);
+        unsigned int getSACount(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength);
+
+public:
+	NegativePatterns(const char *textFileName, unsigned int queriesNum, unsigned int m, vector<unsigned char> selectedChars = {}) {
+		this->textFileName = textFileName;
+		this->setQueriesNum(queriesNum);
+		this->setM(m);
+	}
+	~NegativePatterns() {
+		this->freeMemory();
+	}
+	unsigned char **getPatterns();
 	unsigned int getErrorCountsNumber(unsigned int *countsToCheck);
         unsigned int getErrorLocatesNumber(vector<unsigned int> *locatesToCheck);
 };

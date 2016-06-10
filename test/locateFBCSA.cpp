@@ -65,6 +65,7 @@ void fbcsaStd(string bs, string ss, const char *textFileName, unsigned int queri
 	}
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
+        //NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
 	unsigned char **patterns = P->getPatterns();
 	vector<unsigned int> *indexLocates = new vector<unsigned int>[queriesNum];
 
@@ -111,6 +112,7 @@ void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int quer
 	}
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
+        //NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
 	unsigned char **patterns = P->getPatterns();
 	vector<unsigned int> *indexLocates = new vector<unsigned int>[queriesNum];
 
@@ -157,6 +159,7 @@ void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor,
 	}
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
+        //NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
 	unsigned char **patterns = P->getPatterns();
 	vector<unsigned int> *indexLocates = new vector<unsigned int>[queriesNum];
 

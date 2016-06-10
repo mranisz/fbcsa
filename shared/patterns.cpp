@@ -9,6 +9,26 @@
 #include "patterns.h"
 
 namespace fbcsa {
+    
+void Patterns::setQueriesNum(unsigned int queriesNum) {
+	if (queriesNum == 0) {
+		cout << "Error: not valid queriesNum value" << endl;
+		exit(1);
+	}
+	this->queriesNum = queriesNum;
+}
+
+void Patterns::setM(unsigned int m) {
+	if (m == 0) {
+		cout << "Error: not valid m value" << endl;
+		exit(1);
+	}
+	this->m = m;
+}
+
+void Patterns::setSelectedChars(vector<unsigned char> selectedChars) {
+	this->selectedChars = selectedChars;
+}
 
 void Patterns::initializePatterns() {
 	unsigned int textLen, queriesFirstIndexArrayLen;
@@ -188,10 +208,12 @@ void Patterns::initializeSALocates() {
 }
 
 void Patterns::freeMemory() {
-	for (unsigned int i = 0; i < this->queriesNum; ++i) {
-		delete[] this->patterns[i];
-	}
-	delete[] this->patterns;
+        if (this->patterns != NULL) {
+                for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                        delete[] this->patterns[i];
+                }
+                delete[] this->patterns;
+        }
 	if (this->counts != NULL) delete[] this->counts;
         if (this->locates != NULL) delete[] this->locates;
 }
@@ -224,10 +246,6 @@ vector<unsigned int> *Patterns::getSALocates() {
 	return this->locates;
 }
 
-void Patterns::setSelectedChars(vector<unsigned char> selectedChars) {
-	this->selectedChars = selectedChars;
-}
-
 unsigned int Patterns::getErrorCountsNumber(unsigned int *countsToCheck) {
 	if (this->counts == NULL) this->initializeSACounts();
 	cout << "Checking counts consistency ... " << flush;
@@ -250,6 +268,141 @@ unsigned int Patterns::getErrorLocatesNumber(vector<unsigned int> *locatesToChec
                     unordered_set<unsigned int> set2(locatesToCheck[i].begin(), locatesToCheck[i].end());
                     if (set1 != set2) ++errorLocatesNumber;
                 }
+	}
+	cout << "Done" << endl;
+	return errorLocatesNumber;
+}
+
+void NegativePatterns::setQueriesNum(unsigned int queriesNum) {
+	if (queriesNum == 0) {
+		cout << "Error: not valid queriesNum value" << endl;
+		exit(1);
+	}
+	this->queriesNum = queriesNum;
+}
+
+void NegativePatterns::setM(unsigned int m) {
+	if (m == 0) {
+		cout << "Error: not valid m value" << endl;
+		exit(1);
+	}
+	this->m = m;
+}
+
+void NegativePatterns::initializePatterns() {
+	unsigned int textLen;
+	unsigned char *text = readFileChar(this->textFileName, textLen, 0);
+        if (textLen < this->m) {
+                cout << "Error: text shorter than pattern length" << endl;
+                exit(1);
+        }
+        stringstream ss;
+	ss << "negative-patterns-" << this->textFileName << "-" << this->m << "-" << this->queriesNum << ".dat";
+	string s = ss.str();
+	char *patternFileName = (char *)(s.c_str());
+        
+        this->patterns = new unsigned char *[this->queriesNum];
+
+	if (!fileExists(patternFileName)) {
+                unsigned int saLen;
+		unsigned int *sa = getSA(this->textFileName, text, textLen, saLen, 0, true);
+            
+		cout << "Generating " << this->queriesNum << " negative patterns of length " << this->m << " from " << this->textFileName << " ... " << flush;
+
+		random_device rd;
+		mt19937 gen(rd());
+		uniform_int_distribution<unsigned int> dis(this->m - 1, textLen - 1);
+                uniform_int_distribution<unsigned int> disChars(1, 255);
+                
+                this->patterns[0] = new unsigned char[this->m + 1];
+                this->patterns[0][this->m] = '\0';
+                for (unsigned int j = 0; j < this->m; ++j) {
+                        this->patterns[0][j] = (unsigned char)255;
+                }
+
+                unsigned int genCounter = 0;
+                for (unsigned int i = 1; i < queriesNum; ++i) {
+                        this->patterns[i] = new unsigned char[this->m + 1];
+                        this->patterns[i][this->m] = '\0';
+                        genCounter = 0;
+                        while(true) {
+                                if (genCounter < 10) for (unsigned int j = 0; j < this->m; ++j) this->patterns[i][j] = text[dis(gen) - j];
+                                else if (genCounter < 1000) for (unsigned int j = 0; j < this->m; ++j) this->patterns[i][j] = (unsigned char)disChars(gen);
+                                else {
+                                        cout << "Error: problem with generating negative patterns" << endl;
+                                        exit(1);
+                                }
+                                if (this->getSACount(sa, text, saLen, this->patterns[i], this->m) == 0) break;
+                                ++genCounter;
+                        }
+                }
+                
+                delete[] sa;
+                delete[] text;
+                
+		cout << "Done" << endl;
+		cout << "Saving patterns in " << patternFileName << " ... " << flush;
+		FILE *outFile;
+		outFile = fopen(patternFileName, "w");
+                for (unsigned int i = 0; i < queriesNum; ++i) {
+                        fwrite(this->patterns[i], (size_t)(sizeof(unsigned char)), (size_t)(this->m), outFile);
+                }
+		fclose(outFile);
+		cout << "Done" << endl;
+	} else {
+		cout << "Loading patterns from " << patternFileName << " ... " << flush;
+		FILE *inFile;
+                size_t result;
+		inFile = fopen(patternFileName, "rb");
+                for (unsigned int i = 0; i < queriesNum; ++i) {
+                        this->patterns[i] = new unsigned char[this->m + 1];
+                        this->patterns[i][this->m] = '\0';
+                        result = fread(this->patterns[i], (size_t)(sizeof(unsigned char)), (size_t)(this->m), inFile);
+                        if (result != this->m) {
+                                cout << "Error loading patterns from " << patternFileName << endl;
+                                exit(1);
+                        }
+                }
+		fclose(inFile);
+                cout << "Done" << endl;
+	}
+}
+
+unsigned int NegativePatterns::getSACount(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength) {
+	unsigned int beg = 0, end = 0;
+	binarySearch(sa, text, 0, saLen, pattern, patternLength, beg, end);
+	return end - beg;
+}
+
+void NegativePatterns::freeMemory() {
+        if (this->patterns != NULL) {
+                for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                        delete[] this->patterns[i];
+                }
+                delete[] this->patterns;
+        }
+}
+
+unsigned char **NegativePatterns::getPatterns() {
+        if (this->patterns == NULL) this->initializePatterns();
+	return this->patterns;
+}
+
+unsigned int NegativePatterns::getErrorCountsNumber(unsigned int *countsToCheck) {
+	cout << "Checking counts consistency ... " << flush;
+	unsigned int errorCountsNumber = 0;
+	for (unsigned int i = 0; i < this->queriesNum; ++i) {
+		if (countsToCheck[i] != 0) ++errorCountsNumber;
+	}
+	cout << "Done" << endl;
+	return errorCountsNumber;
+}
+
+unsigned int NegativePatterns::getErrorLocatesNumber(vector<unsigned int> *locatesToCheck) {
+	cout << "Checking locates consistency ... " << flush;
+	unsigned int errorLocatesNumber = 0;
+	for (unsigned int i = 0; i < this->queriesNum; ++i) {
+		if (locatesToCheck[i].size() != 0) ++errorLocatesNumber;
 	}
 	cout << "Done" << endl;
 	return errorLocatesNumber;
