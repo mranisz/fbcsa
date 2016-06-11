@@ -313,6 +313,7 @@ void NegativePatterns::initializePatterns() {
 		mt19937 gen(rd());
 		uniform_int_distribution<unsigned int> dis(this->m - 1, textLen - 1);
                 uniform_int_distribution<unsigned int> disChars(1, 255);
+                uniform_int_distribution<unsigned int> disM(0, this->m - 1);
                 
                 this->patterns[0] = new unsigned char[this->m + 1];
                 this->patterns[0][this->m] = '\0';
@@ -321,12 +322,17 @@ void NegativePatterns::initializePatterns() {
                 }
 
                 unsigned int genCounter = 0;
+                unsigned int replaceCharsNum;
                 for (unsigned int i = 1; i < queriesNum; ++i) {
                         this->patterns[i] = new unsigned char[this->m + 1];
                         this->patterns[i][this->m] = '\0';
                         genCounter = 0;
                         while(true) {
-                                if (genCounter < 10) for (unsigned int j = 0; j < this->m; ++j) this->patterns[i][j] = text[dis(gen) - j];
+                                if (genCounter < 10) {
+                                    for (unsigned int j = 0; j < this->m; ++j) this->patterns[i][j] = text[dis(gen) - j];
+                                    replaceCharsNum = disM(gen);
+                                    for (unsigned int j = 0; j < replaceCharsNum; ++j) this->patterns[i][disM(gen)] = (unsigned char)disChars(gen);
+                                }
                                 else if (genCounter < 1000) for (unsigned int j = 0; j < this->m; ++j) this->patterns[i][j] = (unsigned char)disChars(gen);
                                 else {
                                         cout << "Error: problem with generating negative patterns" << endl;
