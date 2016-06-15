@@ -53,7 +53,7 @@ void Patterns::initializePatterns() {
 		random_device rd;
 		mt19937 gen(rd());
 		uniform_int_distribution<unsigned int> dis(0, textLen - this->m);
-
+                
 		queriesFirstIndexArray = new unsigned int[this->queriesNum];
 
 		unsigned int genVal;
@@ -92,7 +92,7 @@ void Patterns::initializePatterns() {
                 cout << "Done" << endl;
 	}
 	this->patterns = new unsigned char *[this->queriesNum];
-	for (unsigned int i = 0; i < queriesNum; ++i) {
+	for (unsigned int i = 0; i < this->queriesNum; ++i) {
 		this->patterns[i] = new unsigned char[this->m + 1];
 		this->patterns[i][this->m] = '\0';
 		for (unsigned int j = 0; j < this->m; ++j) {
@@ -120,7 +120,7 @@ void Patterns::initializeSACounts() {
 		cout << "Getting counts from SA ... " << flush;
 		this->counts = new unsigned int[this->queriesNum];
 		for (unsigned int i = 0; i < this->queriesNum; ++i) {
-			this->counts[i] = this->getSACount(sa, text, saLen, this->patterns[i], this->m);
+			this->counts[i] = getSACount(sa, text, saLen, this->patterns[i], this->m);
 		}
 		delete[] text;
 		delete[] sa;
@@ -157,7 +157,7 @@ void Patterns::initializeSALocates() {
 		cout << "Getting locates from SA ... " << flush;
 		this->locates = new vector<unsigned int>[this->queriesNum];
 		for (unsigned int i = 0; i < this->queriesNum; ++i) {
-			this->getSALocate(sa, text, saLen, this->patterns[i], this->m, this->locates[i]);
+			getSALocate(sa, text, saLen, this->patterns[i], this->m, this->locates[i]);
                         counter += (this->locates[i].size() + 1);
 		}
 		delete[] text;
@@ -171,11 +171,11 @@ void Patterns::initializeSALocates() {
 		outFile = fopen(locatesFileName, "w");
                 unsigned int locateSize;
                 for (unsigned int i = 0; i < this->queriesNum; ++i) {
-                    locateSize = this->locates[i].size();
-                    fwrite(&locateSize, (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
-                    for(vector<unsigned int>::iterator it = this->locates[i].begin(); it != this->locates[i].end(); ++it) {
-                        fwrite(&(*it), (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
-                    }
+                        locateSize = this->locates[i].size();
+                        fwrite(&locateSize, (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
+                        for(vector<unsigned int>::iterator it = this->locates[i].begin(); it != this->locates[i].end(); ++it) {
+                                fwrite(&(*it), (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
+                        }
                 }
 		fclose(outFile);
 		cout << "Done" << endl;
@@ -216,19 +216,6 @@ void Patterns::freeMemory() {
         }
 	if (this->counts != NULL) delete[] this->counts;
         if (this->locates != NULL) delete[] this->locates;
-}
-
-
-unsigned int Patterns::getSACount(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength) {
-	unsigned int beg = 0, end = 0;
-	binarySearch(sa, text, 0, saLen, pattern, patternLength, beg, end);
-	return end - beg;
-}
-
-void Patterns::getSALocate(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength, vector<unsigned int>& res) {
-	unsigned int beg = 0, end = 0;
-	binarySearch(sa, text, 0, saLen, pattern, patternLength, beg, end);
-        res.insert(res.end(), sa + beg, sa + end); 
 }
 
 unsigned char **Patterns::getPatterns() {
@@ -318,14 +305,14 @@ void NegativePatterns::initializePatterns() {
                 
                 this->patterns[0] = new unsigned char[this->m + 1];
                 this->patterns[0][this->m] = '\0';
-                for (unsigned int j = 0; j < this->m; ++j) {
-                        this->patterns[0][j] = (unsigned char)255;
-                }
+                for (unsigned int j = 0; j < this->m; ++j) this->patterns[0][j] = (unsigned char)255;
+                unsigned int iStart = 0;
+                if (this->getSACount(sa, text, saLen, this->patterns[0], this->m) == 0) iStart = 1;
 
                 unsigned int genCounter = 0;
                 unsigned int replaceCharsNum, selectedPosition;
                 bool *selectedPos = new bool[this->m];
-                for (unsigned int i = 1; i < this->queriesNum; ++i) {
+                for (unsigned int i = iStart; i < this->queriesNum; ++i) {
                         this->patterns[i] = new unsigned char[this->m + 1];
                         this->patterns[i][this->m] = '\0';
                         genCounter = 0;
@@ -422,6 +409,222 @@ unsigned int NegativePatterns::getErrorLocatesNumber(vector<unsigned int> *locat
 	unsigned int errorLocatesNumber = 0;
 	for (unsigned int i = 0; i < this->queriesNum; ++i) {
 		if (locatesToCheck[i].size() != 0) ++errorLocatesNumber;
+	}
+	cout << "Done" << endl;
+	return errorLocatesNumber;
+}
+
+void SpecialPatterns::setM(unsigned int m) {
+	if (m == 0) {
+		cout << "Error: not valid m value" << endl;
+		exit(1);
+	}
+	this->m = m;
+}
+
+void SpecialPatterns::setSelectedChars(vector<unsigned char> selectedChars) {
+	this->selectedChars = selectedChars;
+}
+
+void SpecialPatterns::initializePatterns() {
+	unsigned int textLen;
+	unsigned char *text = readFileChar(this->textFileName, textLen, 0);
+        if (textLen < this->m) {
+                cout << "Error: text shorter than pattern length" << endl;
+                exit(1);
+        }
+        
+        stringstream ss;
+	ss << "special-patterns-" << this->textFileName << "-" << this->m << "-" << getStringFromSelectedChars(this->selectedChars, ".") << ".dat";
+	string s = ss.str();
+	char *patternFileName = (char *)(s.c_str());
+
+	if (!fileExists(patternFileName)) {
+                unsigned int saLen;
+                unsigned int *sa = getSA(this->textFileName, text, textLen, saLen, 0, true);
+
+                cout << "Getting special patterns of length " << this->m << " from " << this->textFileName;
+                if (this->selectedChars.size() != 0) {
+                        cout << ", alphabet (ordinal): {" << getStringFromSelectedChars(this->selectedChars, ", ") << "}";
+                }
+                cout << " ... " << flush;
+                
+                unsigned int specialPatternsNum = 4;
+                unsigned int queriesFirstIndexArray[specialPatternsNum] = {0, textLen - this->m, sa[1], sa[saLen - 1]};
+
+                if (this->selectedChars.size() != 0) {
+                        this->queriesNum = 0;
+                        for (unsigned long long i = 0; i < specialPatternsNum; ++i) {
+                                queriesFirstIndexArray[(this->queriesNum)++] = queriesFirstIndexArray[i];
+                                for (unsigned int j = 0; j < this->m; ++j) {
+                                        bool inSigma = false;
+                                        for (vector<unsigned char>::iterator it = this->selectedChars.begin(); it != this->selectedChars.end(); ++it) {
+                                                if (text[j + queriesFirstIndexArray[i]] == (*it)) {
+                                                        inSigma = true;
+                                                        break;
+                                                }
+                                        }
+                                        if (!inSigma) {
+                                                --(this->queriesNum);
+                                                break;
+                                        }
+                                }
+                        }
+                } else {
+                        this->queriesNum = specialPatternsNum;
+                }
+                if (this->queriesNum > 0) {
+                        this->patterns = new unsigned char *[this->queriesNum];
+                        for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                                this->patterns[i] = new unsigned char[this->m + 1];
+                                this->patterns[i][this->m] = '\0';
+                                for (unsigned int j = 0; j < this->m; ++j) {
+                                        this->patterns[i][j] = text[queriesFirstIndexArray[i] + j];
+                                }
+                        }
+                        this->counts = new unsigned int[this->queriesNum];
+                        for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                                this->counts[i] = getSACount(sa, text, saLen, this->patterns[i], this->m);
+                        }
+                        this->locates = new vector<unsigned int>[this->queriesNum];
+                        for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                                getSALocate(sa, text, saLen, this->patterns[i], this->m, this->locates[i]);
+                        }
+                }
+                delete[] sa;
+                cout << "Done" << endl;
+                if (this->queriesNum == 0) cout << "There is no special patterns for selected characters" << endl;
+                
+                cout << "Saving patterns in " << patternFileName << " ... " << flush;
+		FILE *outFile;
+		outFile = fopen(patternFileName, "w");
+                fwrite(&this->queriesNum, (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
+                if (this->queriesNum > 0) {
+                        for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                                fwrite(this->patterns[i], (size_t)(sizeof(unsigned char)), (size_t)(this->m), outFile);
+                        }
+                        fwrite(this->counts, (size_t)(sizeof(unsigned int)), (size_t)(this->queriesNum), outFile);
+                        unsigned int locateSize;
+                        for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                                locateSize = this->locates[i].size();
+                                fwrite(&locateSize, (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
+                                for(vector<unsigned int>::iterator it = this->locates[i].begin(); it != this->locates[i].end(); ++it) {
+                                        fwrite(&(*it), (size_t)(sizeof(unsigned int)), (size_t)1, outFile);
+                                }
+                        }
+                }
+		fclose(outFile);
+		cout << "Done" << endl;
+        } else {
+                cout << "Loading patterns from " << patternFileName << " ... " << flush;
+		size_t result;
+                unsigned int locateSize, locateValue;
+                FILE *inFile;
+		inFile = fopen(patternFileName, "rb");
+                result = fread(&this->queriesNum, (size_t)(sizeof(unsigned int)), (size_t)1, inFile);
+                if (result != 1) {
+                        cout << "Error reading file " << patternFileName << endl;
+                        exit(1);
+                }
+                if (this->queriesNum > 0) {
+                        this->patterns = new unsigned char *[this->queriesNum];
+                        for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                                this->patterns[i] = new unsigned char[this->m + 1];
+                                this->patterns[i][this->m] = '\0';
+                                result = fread(this->patterns[i], (size_t)(sizeof(unsigned char)), (size_t)(this->m), inFile);
+                                if (result != this->m) {
+                                        cout << "Error reading file " << patternFileName << endl;
+                                        exit(1);
+                                }
+                        }
+                        this->counts = new unsigned int[this->queriesNum];
+                        result = fread(this->counts, (size_t)(sizeof(unsigned int)), (size_t)(this->queriesNum), inFile);
+                        if (result != this->queriesNum) {
+                                cout << "Error reading file " << patternFileName << endl;
+                                exit(1);
+                        }
+                        this->locates = new vector<unsigned int>[this->queriesNum];
+                        for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                                result = fread(&locateSize, (size_t)(sizeof(unsigned int)), (size_t)1, inFile);
+                                if (result != 1) {
+                                        cout << "Error reading file " << patternFileName << endl;
+                                        exit(1);
+                                }
+                                for (unsigned int j = 0; j < locateSize; ++j) {
+                                        result = fread(&locateValue, (size_t)(sizeof(unsigned int)), (size_t)1, inFile);
+                                        if (result != 1) {
+                                                cout << "Error reading file " << patternFileName << endl;
+                                                exit(1);
+                                        }
+                                        this->locates[i].push_back(locateValue);
+                                }
+                        }
+                }
+                fclose(inFile);
+                cout << "Done" << endl;
+            
+        }
+
+	delete[] text;
+        
+        this->initialized = true;
+
+}
+
+void SpecialPatterns::freeMemory() {
+        if (this->patterns != NULL) {
+                for (unsigned int i = 0; i < this->queriesNum; ++i) {
+                        delete[] this->patterns[i];
+                }
+                delete[] this->patterns;
+        }
+	if (this->counts != NULL) delete[] this->counts;
+        if (this->locates != NULL) delete[] this->locates;
+        this->initialized = false;
+}
+
+unsigned char **SpecialPatterns::getPatterns() {
+        if (!this->initialized) this->initializePatterns();
+	return this->patterns;
+}
+
+unsigned int *SpecialPatterns::getSACounts() {
+	if (!this->initialized) this->initializePatterns();
+	return this->counts;
+}
+
+vector<unsigned int> *SpecialPatterns::getSALocates() {
+	if (!this->initialized) this->initializePatterns();
+	return this->locates;
+}
+
+unsigned int SpecialPatterns::getQueriesNum() {
+        if (!this->initialized) this->initializePatterns();
+	return this->queriesNum;
+}
+
+unsigned int SpecialPatterns::getErrorCountsNumber(unsigned int *countsToCheck) {
+	if (!this->initialized) this->initializePatterns();
+	cout << "Checking counts consistency ... " << flush;
+	unsigned int errorCountsNumber = 0;
+	for (unsigned int i = 0; i < this->queriesNum; ++i) {
+		if (countsToCheck[i] != this->counts[i]) ++errorCountsNumber;
+	}
+	cout << "Done" << endl;
+	return errorCountsNumber;
+}
+
+unsigned int SpecialPatterns::getErrorLocatesNumber(vector<unsigned int> *locatesToCheck) {
+	if (!this->initialized) this->initializePatterns();
+	cout << "Checking locates consistency ... " << flush;
+	unsigned int errorLocatesNumber = 0;
+	for (unsigned int i = 0; i < this->queriesNum; ++i) {
+		if (locatesToCheck[i].size() != this->locates[i].size()) ++errorLocatesNumber;
+                else {
+                    unordered_set<unsigned int> set1(this->locates[i].begin(), this->locates[i].end());
+                    unordered_set<unsigned int> set2(locatesToCheck[i].begin(), locatesToCheck[i].end());
+                    if (set1 != set2) ++errorLocatesNumber;
+                }
 	}
 	cout << "Done" << endl;
 	return errorLocatesNumber;

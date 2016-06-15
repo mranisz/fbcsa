@@ -23,8 +23,6 @@ private:
 	void initializePatterns();
 	void initializeSACounts();
         void initializeSALocates();
-	unsigned int getSACount(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength);
-        void getSALocate(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength, vector<unsigned int>& res);
 	void setSelectedChars(vector<unsigned char> selectedChars);
 
 public:
@@ -68,6 +66,41 @@ public:
 		this->freeMemory();
 	}
 	unsigned char **getPatterns();
+	unsigned int getErrorCountsNumber(unsigned int *countsToCheck);
+        unsigned int getErrorLocatesNumber(vector<unsigned int> *locatesToCheck);
+};
+
+class SpecialPatterns {
+private:
+	const char *textFileName;
+	unsigned int queriesNum;
+	unsigned int m;
+	vector<unsigned char> selectedChars;
+        bool initialized = false;
+	unsigned char **patterns = NULL;
+	unsigned int *counts = NULL;
+        vector<unsigned int> *locates = NULL;
+
+	void freeMemory();
+        void setM(unsigned int m);
+	void initializePatterns();
+	void initializeSACounts();
+        void initializeSALocates();
+	void setSelectedChars(vector<unsigned char> selectedChars);
+
+public:
+	SpecialPatterns(const char *textFileName, unsigned int m, vector<unsigned char> selectedChars = {}) {
+		this->textFileName = textFileName;
+		this->setM(m);
+		this->setSelectedChars(selectedChars);
+	}
+	~SpecialPatterns() {
+		this->freeMemory();
+	}
+	unsigned char **getPatterns();
+        unsigned int getQueriesNum();
+	unsigned int *getSACounts();
+        vector<unsigned int> *getSALocates();
 	unsigned int getErrorCountsNumber(unsigned int *countsToCheck);
         unsigned int getErrorLocatesNumber(vector<unsigned int> *locatesToCheck);
 };
