@@ -302,17 +302,11 @@ void NegativePatterns::initializePatterns() {
                 uniform_int_distribution<unsigned int> disChoice(0, 2);
                 
                 this->patterns = new unsigned char *[this->queriesNum];
-                
-                this->patterns[0] = new unsigned char[this->m + 1];
-                this->patterns[0][this->m] = '\0';
-                for (unsigned int j = 0; j < this->m; ++j) this->patterns[0][j] = (unsigned char)255;
-                unsigned int iStart = 0;
-                if (this->getSACount(sa, text, saLen, this->patterns[0], this->m) == 0) iStart = 1;
 
                 unsigned int genCounter = 0;
                 unsigned int replaceCharsNum, selectedPosition;
                 bool *selectedPos = new bool[this->m];
-                for (unsigned int i = iStart; i < this->queriesNum; ++i) {
+                for (unsigned int i = 0; i < this->queriesNum; ++i) {
                         this->patterns[i] = new unsigned char[this->m + 1];
                         this->patterns[i][this->m] = '\0';
                         genCounter = 0;
@@ -414,7 +408,7 @@ unsigned int NegativePatterns::getErrorLocatesNumber(vector<unsigned int> *locat
 	return errorLocatesNumber;
 }
 
-void SpecialPatterns::setM(unsigned int m) {
+void MaliciousPatterns::setM(unsigned int m) {
 	if (m == 0) {
 		cout << "Error: not valid m value" << endl;
 		exit(1);
@@ -422,11 +416,11 @@ void SpecialPatterns::setM(unsigned int m) {
 	this->m = m;
 }
 
-void SpecialPatterns::setSelectedChars(vector<unsigned char> selectedChars) {
+void MaliciousPatterns::setSelectedChars(vector<unsigned char> selectedChars) {
 	this->selectedChars = selectedChars;
 }
 
-void SpecialPatterns::initializePatterns() {
+void MaliciousPatterns::initializePatterns() {
 	unsigned int textLen;
 	unsigned char *text = readFileChar(this->textFileName, textLen, 0);
         if (textLen < this->m) {
@@ -435,7 +429,7 @@ void SpecialPatterns::initializePatterns() {
         }
         
         stringstream ss;
-	ss << "special-patterns-" << this->textFileName << "-" << this->m << "-" << getStringFromSelectedChars(this->selectedChars, ".") << ".dat";
+	ss << "malicious-patterns-" << this->textFileName << "-" << this->m << "-" << getStringFromSelectedChars(this->selectedChars, ".") << ".dat";
 	string s = ss.str();
 	char *patternFileName = (char *)(s.c_str());
 
@@ -443,18 +437,18 @@ void SpecialPatterns::initializePatterns() {
                 unsigned int saLen;
                 unsigned int *sa = getSA(this->textFileName, text, textLen, saLen, 0, true);
 
-                cout << "Getting special patterns of length " << this->m << " from " << this->textFileName;
+                cout << "Getting malicious patterns of length " << this->m << " from " << this->textFileName;
                 if (this->selectedChars.size() != 0) {
                         cout << ", alphabet (ordinal): {" << getStringFromSelectedChars(this->selectedChars, ", ") << "}";
                 }
                 cout << " ... " << flush;
                 
-                unsigned int specialPatternsNum = 4;
-                unsigned int queriesFirstIndexArray[specialPatternsNum] = {0, textLen - this->m, sa[1], sa[saLen - 1]};
+                unsigned int maliciousPatternsNum = 4;
+                unsigned int queriesFirstIndexArray[maliciousPatternsNum] = {0, textLen - this->m, sa[1], sa[saLen - 1]};
 
                 if (this->selectedChars.size() != 0) {
                         this->queriesNum = 0;
-                        for (unsigned long long i = 0; i < specialPatternsNum; ++i) {
+                        for (unsigned long long i = 0; i < maliciousPatternsNum; ++i) {
                                 queriesFirstIndexArray[(this->queriesNum)++] = queriesFirstIndexArray[i];
                                 for (unsigned int j = 0; j < this->m; ++j) {
                                         bool inSigma = false;
@@ -471,16 +465,39 @@ void SpecialPatterns::initializePatterns() {
                                 }
                         }
                 } else {
-                        this->queriesNum = specialPatternsNum;
+                        this->queriesNum = maliciousPatternsNum;
                 }
-                if (this->queriesNum > 0) {
-                        this->patterns = new unsigned char *[this->queriesNum];
+                unsigned char *maliciousPattern255 = new unsigned char[this->m + 1];
+                maliciousPattern255[this->m] = '\0';
+                for (unsigned int i = 0; i < this->m; ++i) maliciousPattern255[i] = (unsigned char)255;
+                bool addMaliciousPattern255 = true;
+                if (this->selectedChars.size() != 0 && getSACount(sa, text, saLen, maliciousPattern255, this->m) > 0) {
+                        addMaliciousPattern255 = false;
+                        for (vector<unsigned char>::iterator it = this->selectedChars.begin(); it != this->selectedChars.end(); ++it) {
+                                if ((unsigned char)255 == (*it)) {
+                                        addMaliciousPattern255 = true;
+                                        break;
+                                }
+                        }
+                }
+                delete[] maliciousPattern255;
+                if (this->queriesNum > 0 || addMaliciousPattern255) {
+                        if (addMaliciousPattern255) this->patterns = new unsigned char *[this->queriesNum + 1];
+                        else this->patterns = new unsigned char *[this->queriesNum];
                         for (unsigned int i = 0; i < this->queriesNum; ++i) {
                                 this->patterns[i] = new unsigned char[this->m + 1];
                                 this->patterns[i][this->m] = '\0';
                                 for (unsigned int j = 0; j < this->m; ++j) {
                                         this->patterns[i][j] = text[queriesFirstIndexArray[i] + j];
                                 }
+                        }
+                        if (addMaliciousPattern255) {
+                                this->patterns[this->queriesNum] = new unsigned char[this->m + 1];
+                                this->patterns[this->queriesNum][this->m] = '\0';
+                                for (unsigned int j = 0; j < this->m; ++j) {
+                                        this->patterns[this->queriesNum][j] = (unsigned char)255;
+                                }
+                                ++(this->queriesNum);
                         }
                         this->counts = new unsigned int[this->queriesNum];
                         for (unsigned int i = 0; i < this->queriesNum; ++i) {
@@ -493,7 +510,7 @@ void SpecialPatterns::initializePatterns() {
                 }
                 delete[] sa;
                 cout << "Done" << endl;
-                if (this->queriesNum == 0) cout << "There is no special patterns for selected characters" << endl;
+                if (this->queriesNum == 0) cout << "There is no malicious pattern for selected characters" << endl;
                 
                 cout << "Saving patterns in " << patternFileName << " ... " << flush;
 		FILE *outFile;
@@ -571,7 +588,7 @@ void SpecialPatterns::initializePatterns() {
 
 }
 
-void SpecialPatterns::freeMemory() {
+void MaliciousPatterns::freeMemory() {
         if (this->patterns != NULL) {
                 for (unsigned int i = 0; i < this->queriesNum; ++i) {
                         delete[] this->patterns[i];
@@ -583,27 +600,27 @@ void SpecialPatterns::freeMemory() {
         this->initialized = false;
 }
 
-unsigned char **SpecialPatterns::getPatterns() {
+unsigned char **MaliciousPatterns::getPatterns() {
         if (!this->initialized) this->initializePatterns();
 	return this->patterns;
 }
 
-unsigned int *SpecialPatterns::getSACounts() {
+unsigned int *MaliciousPatterns::getSACounts() {
 	if (!this->initialized) this->initializePatterns();
 	return this->counts;
 }
 
-vector<unsigned int> *SpecialPatterns::getSALocates() {
+vector<unsigned int> *MaliciousPatterns::getSALocates() {
 	if (!this->initialized) this->initializePatterns();
 	return this->locates;
 }
 
-unsigned int SpecialPatterns::getQueriesNum() {
+unsigned int MaliciousPatterns::getQueriesNum() {
         if (!this->initialized) this->initializePatterns();
 	return this->queriesNum;
 }
 
-unsigned int SpecialPatterns::getErrorCountsNumber(unsigned int *countsToCheck) {
+unsigned int MaliciousPatterns::getErrorCountsNumber(unsigned int *countsToCheck) {
 	if (!this->initialized) this->initializePatterns();
 	cout << "Checking counts consistency ... " << flush;
 	unsigned int errorCountsNumber = 0;
@@ -614,7 +631,7 @@ unsigned int SpecialPatterns::getErrorCountsNumber(unsigned int *countsToCheck) 
 	return errorCountsNumber;
 }
 
-unsigned int SpecialPatterns::getErrorLocatesNumber(vector<unsigned int> *locatesToCheck) {
+unsigned int MaliciousPatterns::getErrorLocatesNumber(vector<unsigned int> *locatesToCheck) {
 	if (!this->initialized) this->initializePatterns();
 	cout << "Checking locates consistency ... " << flush;
 	unsigned int errorLocatesNumber = 0;

@@ -70,7 +70,7 @@ public:
         unsigned int getErrorLocatesNumber(vector<unsigned int> *locatesToCheck);
 };
 
-class SpecialPatterns {
+class MaliciousPatterns {
 private:
 	const char *textFileName;
 	unsigned int queriesNum;
@@ -89,12 +89,12 @@ private:
 	void setSelectedChars(vector<unsigned char> selectedChars);
 
 public:
-	SpecialPatterns(const char *textFileName, unsigned int m, vector<unsigned char> selectedChars = {}) {
+	MaliciousPatterns(const char *textFileName, unsigned int m, vector<unsigned char> selectedChars = {}) {
 		this->textFileName = textFileName;
 		this->setM(m);
 		this->setSelectedChars(selectedChars);
 	}
-	~SpecialPatterns() {
+	~MaliciousPatterns() {
 		this->freeMemory();
 	}
 	unsigned char **getPatterns();

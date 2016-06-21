@@ -66,7 +66,7 @@ void fbcsaStd(string bs, string ss, const char *textFileName, unsigned int queri
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
         //NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-        /*SpecialPatterns *P = new SpecialPatterns(textFileName, m);
+        /*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
         queriesNum = P->getQueriesNum();
         if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -116,7 +116,7 @@ void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int quer
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
         //NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-        /*SpecialPatterns *P = new SpecialPatterns(textFileName, m);
+        /*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
         queriesNum = P->getQueriesNum();
         if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -166,7 +166,7 @@ void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor,
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
         //NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-        /*SpecialPatterns *P = new SpecialPatterns(textFileName, m);
+        /*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
         queriesNum = P->getQueriesNum();
         if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
