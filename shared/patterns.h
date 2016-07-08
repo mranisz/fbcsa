@@ -53,11 +53,10 @@ private:
         void setQueriesNum(unsigned int queriesNum);
         void setM(unsigned int m);
 	void initializePatterns();
-	void setSelectedChars(vector<unsigned char> selectedChars);
         unsigned int getSACount(unsigned int *sa, unsigned char *text, unsigned int saLen, unsigned char *pattern, int patternLength);
 
 public:
-	NegativePatterns(const char *textFileName, unsigned int queriesNum, unsigned int m, vector<unsigned char> selectedChars = {}) {
+	NegativePatterns(const char *textFileName, unsigned int queriesNum, unsigned int m) {
 		this->textFileName = textFileName;
 		this->setQueriesNum(queriesNum);
 		this->setM(m);
