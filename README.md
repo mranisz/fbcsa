@@ -23,7 +23,7 @@ To use the FBCSA library:
 - compile it with "-std=c++11 -O3 -mpopcnt" options and link it with libraries:
   - fbcsa/libfbcsa.a
   - fbcsa/libs/libaelf64.a (linux) or fbcsa/libs/libacof64.lib (windows)
-- use "fbcsa" namespace
+- use "fbcsa" and "shared" namespaces
 
 ##API
 There are several functions you can call on each of the FBCSA text index:
@@ -124,6 +124,7 @@ FBCSALut2(unsigned int bs, unsigned int ss);
 #include "fbcsa/fbcsa.h"
 
 using namespace std;
+using namespace shared;
 using namespace fbcsa;
 
 int main(int argc, char *argv[]) {

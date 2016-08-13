@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace fbcsa {
+namespace shared {
 
 class Patterns {
 private:

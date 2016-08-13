@@ -8,7 +8,7 @@
 #include "common.h"
 #include "patterns.h"
 
-namespace fbcsa {
+namespace shared {
     
 void Patterns::setQueriesNum(unsigned int queriesNum) {
 	if (queriesNum == 0) {

@@ -5,7 +5,7 @@
 #include "common.h"
 #include "sakeys.h"
 
-namespace fbcsa {
+namespace shared {
 
 void SAKeys::initialize() {
 	this->initializeSAKeys();

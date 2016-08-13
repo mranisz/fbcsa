@@ -8,6 +8,7 @@
 #include "../fbcsa.h"
 
 using namespace std;
+using namespace shared;
 using namespace fbcsa;
 
 ChronoStopWatch timer;

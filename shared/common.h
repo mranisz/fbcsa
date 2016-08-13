@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace fbcsa {
+namespace shared {
 
 class Index {
 protected:
