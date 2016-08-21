@@ -19,7 +19,7 @@ make
 
 ##Usage
 To use the FBCSA library:
-- include "fbcsa/fbcsa.h" to your project
+- include "fbcsa/fbcsa.hpp" to your project
 - compile it with "-std=c++11 -O3 -mpopcnt" options and link it with libraries:
   - fbcsa/libfbcsa.a
   - fbcsa/libs/libaelf64.a (linux) or fbcsa/libs/libacof64.lib (windows)
@@ -68,52 +68,63 @@ void locate(unsigned char *pattern, unsigned int patternLen, vector<unsigned int
 void setVerbose(bool verbose);
 ```
 
-##FBCSA
+##FBCSA\<unsigned int BS\>
 
 Parameters:
-- bs - block size, must be a multiple of 32 (default: bs = 32)
+- BS - block size
 - ss - sampling step (default: ss = 5)
+
+Limitations: 
+- BS > 0
+- BS must be a multiple of 32
+- ss > 0
 
 Constructors:
 ```
-FBCSA();
-FBCSA(unsigned int bs, unsigned int ss);
+FBCSA<unsigned int BS>();
+FBCSA<unsigned int BS>(unsigned int ss);
 ```
 
-##FBCSA-hash
-FBCSA-hash is FBCSA with hashed k-symbol prefixes of suffix array suffixes to speed up searches (k ≥ 2). This variant is particularly efficient in speed for short patterns (not much longer than k).
+##FBCSAHash\<unsigned int BS, HTType HASHTYPE\>
+FBCSAHash is FBCSA with hashed k-symbol prefixes of suffix array suffixes to speed up searches (k ≥ 2). This variant is particularly efficient in speed for short patterns (not much longer than k).
 
 Parameters:
-- bs - block size, must be a multiple of 32
+- BS - block size
+- HASHTYPE:
+      - HTType::STANDARD - using 8 bytes for each hashed entry: 4 bytes for left boundary + 4 bytes for right boundary
+      - HTType::DENSE - using 6 bytes for each hashed entry: 4 bytes for left boundary + 2 bytes for right boundary
 - ss - sampling step
-- hash type:
-      - HT::STANDARD - using 8 bytes for each hashed entry: 4 bytes for left boundary + 4 bytes for right boundary
-      - HT::DENSE - using 6 bytes for each hashed entry: 4 bytes for left boundary + 2 bytes for right boundary
 - k - length of prefixes of suffixes from suffix array (k ≥ 2)
 - loadFactor - hash table load factor (0.0 < loadFactor < 1.0)
 
-Limitations: 
+Limitations:
 - pattern length ≥ k (patterns shorter than k are handled by standard variant of FBCSA index)
+- BS > 0
+- BS must be a multiple of 32
+- ss > 0
 
 Constructors:
 ```
-FBCSA(unsigned int bs, unsigned int ss, HT::HTType hTType, unsigned int k, double loadFactor);
+FBCSAHash<unsigned int BS, HTType HASHTYPE>(unsigned int ss, unsigned int k, double loadFactor);
 ```
 
-##FBCSA-LUT2
+##FBCSALut2\<unsigned int BS\>
 To speed up searches, FBCSA stores lookup table over all 2-symbol strings (LUT2), whose entries are the suffix intervals.
 
 Parameters:
-- bs - block size, must be a multiple of 32 (default: bs = 32)
+- BS - block size
 - ss - sampling step (default: ss = 5)
 
 Limitations: 
 - pattern length ≥ 2 (patterns shorter than 2 are handled by standard variant of FBCSA index)
+- BS > 0
+- BS must be a multiple of 32
+- ss > 0
 
 Constructors:
 ```
-FBCSALut2();
-FBCSALut2(unsigned int bs, unsigned int ss);
+FBCSALut2<unsigned int BS>();
+FBCSALut2<unsigned int BS>(unsigned int ss);
 ```
 
 ##FBCSA usage example
@@ -121,7 +132,7 @@ FBCSALut2(unsigned int bs, unsigned int ss);
 #include <iostream>
 #include <stdlib.h>
 #include "fbcsa/shared/patterns.h"
-#include "fbcsa/fbcsa.h"
+#include "fbcsa/fbcsa.hpp"
 
 using namespace std;
 using namespace shared;
@@ -131,15 +142,13 @@ int main(int argc, char *argv[]) {
 
 	unsigned int queriesNum = 1000000;
 	unsigned int patternLen = 20;
-	FBCSA *fbcsa;
+	FBCSA<32> *fbcsa = new FBCSA<32>();
 	const char *textFileName = "english";
 	const char *indexFileName = "english-fbcsa.idx";
 
 	if (fileExists(indexFileName)) {
-		fbcsa = new FBCSA();
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa = new FBCSA();
 		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);

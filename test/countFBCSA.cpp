@@ -5,7 +5,7 @@
 #include <map>
 #include "../shared/patterns.h"
 #include "../shared/timer.h"
-#include "../fbcsa.h"
+#include "../fbcsa.hpp"
 
 using namespace std;
 using namespace shared;
@@ -13,19 +13,26 @@ using namespace fbcsa;
 
 ChronoStopWatch timer;
 
-map<string, HT::HTType> hashTypesMap = {{"hash", HT::STANDARD}, {"hash-dense", HT::DENSE}};
-
-void fbcsaStd(string bs, string ss, const char *textFileName, unsigned int queriesNum, unsigned int m);
-void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int queriesNum, unsigned int m);
-void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa32(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa64(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa32Lut2(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa64Lut2(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa32Hash(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa64Hash(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa32HashDense(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m);
+void fbcsa64HashDense(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m);
 
 void getUsage(char **argv) {
 	cout << "Select index you want to test (count):" << endl;
-	cout << "FBCSA: " << argv[0] << " std bs ss fileName patternNum patternLen" << endl;
-        cout << "FBCSA-LUT2: " << argv[0] << " lut2 bs ss fileName patternNum patternLen" << endl;
-        cout << "FBCSA-hash: " << argv[0] << " std bs ss hash|hash-dense k loadFactor fileName patternNum patternLen" << endl;
-        cout << "where:" << endl;
-        cout << "bs - block size (must be a multiple of 32)" << endl;
+	cout << "FBCSA-32: " << argv[0] << " 32 ss fileName patternNum patternLen" << endl;
+	cout << "FBCSA-64: " << argv[0] << " 64 ss fileName patternNum patternLen" << endl;
+    cout << "FBCSA-32-LUT2: " << argv[0] << " 32-lut2 ss fileName patternNum patternLen" << endl;
+	cout << "FBCSA-64-LUT2: " << argv[0] << " 64-lut2 ss fileName patternNum patternLen" << endl;
+    cout << "FBCSA-32-hash: " << argv[0] << " 32-hash ss k loadFactor fileName patternNum patternLen" << endl;
+	cout << "FBCSA-64-hash: " << argv[0] << " 64-hash ss k loadFactor fileName patternNum patternLen" << endl;
+	cout << "FBCSA-32-hash-dense: " << argv[0] << " 32-hash-dense ss k loadFactor fileName patternNum patternLen" << endl;
+	cout << "FBCSA-64-hash-dense: " << argv[0] << " 64-hash-dense ss k loadFactor fileName patternNum patternLen" << endl;
+    cout << "where:" << endl;
 	cout << "ss - sampling step" << endl;
 	cout << "fileName - name of text file" << endl;
 	cout << "patternNum - number of patterns (queries)" << endl;
@@ -35,41 +42,40 @@ void getUsage(char **argv) {
 }
 
 int main(int argc, char *argv[]) {
-	if (argc < 7) {
+	if (argc < 6) {
 		getUsage(argv);
 		exit(1);
 	}
-        if ((string)argv[1] == "std") {
-                if (argc == 7) fbcsaStd(string(argv[2]), string(argv[3]), argv[4], atoi(argv[5]), atoi(argv[6]));
-                else if (argc == 10 && hashTypesMap.find(string(argv[4])) != hashTypesMap.end()) fbcsaHash(string(argv[2]), string(argv[3]), string(argv[4]), string(argv[5]), string(argv[6]), argv[7], atoi(argv[8]), atoi(argv[9]));
-	}
-        else if ((string)argv[1] == "lut2") {
-                if (argc == 7) fbcsaLut2(string(argv[2]), string(argv[3]), argv[4], atoi(argv[5]), atoi(argv[6]));
-	}
-        getUsage(argv);
-        exit(1);
+    if (string(argv[1]) == "32") fbcsa32(string(argv[2]), argv[3], atoi(argv[4]), atoi(argv[5]));
+	if (string(argv[1]) == "64") fbcsa64(string(argv[2]), argv[3], atoi(argv[4]), atoi(argv[5]));
+	if (string(argv[1]) == "32-lut2") fbcsa32Lut2(string(argv[2]), argv[3], atoi(argv[4]), atoi(argv[5]));
+	if (string(argv[1]) == "64-lut2") fbcsa64Lut2(string(argv[2]), argv[3], atoi(argv[4]), atoi(argv[5]));
+	if (string(argv[1]) == "32-hash") fbcsa32Hash(string(argv[2]), string(argv[3]), string(argv[4]), argv[5], atoi(argv[6]), atoi(argv[7]));
+	if (string(argv[1]) == "64-hash") fbcsa64Hash(string(argv[2]), string(argv[3]), string(argv[4]), argv[5], atoi(argv[6]), atoi(argv[7]));
+	if (string(argv[1]) == "32-hash-dense") fbcsa32HashDense(string(argv[2]), string(argv[3]), string(argv[4]), argv[5], atoi(argv[6]), atoi(argv[7]));
+	if (string(argv[1]) == "64-hash-dense") fbcsa64HashDense(string(argv[2]), string(argv[3]), string(argv[4]), argv[5], atoi(argv[6]), atoi(argv[7]));
+	getUsage(argv);
+	exit(1);
 }
 
-void fbcsaStd(string bs, string ss, const char *textFileName, unsigned int queriesNum, unsigned int m) {
-	FBCSA *fbcsa;
-        string indexFileNameString = "FBCSA-" + (string)textFileName + "-" +  bs + "-" + ss + ".idx";
+void fbcsa32(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSA<32> *fbcsa = new FBCSA<32>(atoi(ss.c_str()));
+    string indexFileNameString = "FBCSA-" + (string)textFileName + "-32-" + ss + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
 
 	if (fileExists(indexFileName)) {
-		fbcsa = new FBCSA();
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa = new FBCSA(atoi(bs.c_str()), atoi(ss.c_str()));
 		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
-        //NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-        /*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
-        queriesNum = P->getQueriesNum();
-        if (queriesNum == 0) exit(1);*/
+	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
 	unsigned int *indexCounts = new unsigned int[queriesNum];
 
@@ -82,8 +88,8 @@ void fbcsaStd(string bs, string ss, const char *textFileName, unsigned int queri
 	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSA.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
-	cout << "count FBCSA-" << bs << "-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
-	resultFile << m << " " << queriesNum << " " << bs << " " << ss << " " << size << " " << timer.getElapsedTime();
+	cout << "count FBCSA-32-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 32 " << ss << " " << size << " " << timer.getElapsedTime();
 
 	unsigned int differences = P->getErrorCountsNumber(indexCounts);
 	if (differences > 0) {
@@ -98,19 +104,66 @@ void fbcsaStd(string bs, string ss, const char *textFileName, unsigned int queri
 	delete[] indexCounts;
 	delete fbcsa;
 	delete P;
-        exit(0);
+    exit(0);
 }
 
-void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int queriesNum, unsigned int m) {
-	FBCSALut2 *fbcsaLut2;
-        string indexFileNameString = "FBCSALut2-" + (string)textFileName + "-" +  bs + "-" + ss + ".idx";
+void fbcsa64(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSA<64> *fbcsa = new FBCSA<64>(atoi(ss.c_str()));
+    string indexFileNameString = "FBCSA-" + (string)textFileName + "-64-" + ss + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
 
 	if (fileExists(indexFileName)) {
-		fbcsaLut2 = new FBCSALut2();
+		fbcsa->load(indexFileName);
+	} else {
+		fbcsa->setVerbose(true);
+		fbcsa->build(textFileName);
+		fbcsa->save(indexFileName);
+	}
+
+	Patterns *P = new Patterns(textFileName, queriesNum, m);
+	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
+	unsigned char **patterns = P->getPatterns();
+	unsigned int *indexCounts = new unsigned int[queriesNum];
+
+	timer.startTimer();
+	for (unsigned int i = 0; i < queriesNum; ++i) {
+		indexCounts[i] = fbcsa->count(patterns[i], m);
+	}
+	timer.stopTimer();
+
+	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSA.txt";
+	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
+	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
+	cout << "count FBCSA-64-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 64 " << ss << " " << size << " " << timer.getElapsedTime();
+
+	unsigned int differences = P->getErrorCountsNumber(indexCounts);
+	if (differences > 0) {
+		cout << "DIFFERENCES: " << differences << endl;
+		resultFile << " DIFFERENCES: " << differences;
+	} else {
+		cout << "Differences: " << differences << endl;
+	}
+	resultFile << endl;
+	resultFile.close();
+
+	delete[] indexCounts;
+	delete fbcsa;
+	delete P;
+    exit(0);
+}
+
+void fbcsa32Lut2(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSALut2<32> *fbcsaLut2 = new FBCSALut2<32>(atoi(ss.c_str()));
+    string indexFileNameString = "FBCSALut2-" + (string)textFileName + "-32-" + ss + ".idx";
+	const char *indexFileName = indexFileNameString.c_str();
+
+	if (fileExists(indexFileName)) {
 		fbcsaLut2->load(indexFileName);
 	} else {
-		fbcsaLut2 = new FBCSALut2(atoi(bs.c_str()), atoi(ss.c_str()));
 		fbcsaLut2->setVerbose(true);
 		fbcsaLut2->build(textFileName);
 		fbcsaLut2->save(indexFileName);
@@ -118,10 +171,10 @@ void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int quer
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
 	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-        /*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
-        queriesNum = P->getQueriesNum();
-        if (queriesNum == 0) exit(1);*/
-        unsigned char **patterns = P->getPatterns();
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
+	unsigned char **patterns = P->getPatterns();
 	unsigned int *indexCounts = new unsigned int[queriesNum];
 
 	timer.startTimer();
@@ -133,8 +186,8 @@ void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int quer
 	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSALut2.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsaLut2->getIndexSize() / (double)fbcsaLut2->getTextSize();
-	cout << "count FBCSALut2-" << bs << "-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
-	resultFile << m << " " << queriesNum << " " << bs << " " << ss << " " << size << " " << timer.getElapsedTime();
+	cout << "count FBCSALut2-32-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 32 " << ss << " " << size << " " << timer.getElapsedTime();
 
 	unsigned int differences = P->getErrorCountsNumber(indexCounts);
 	if (differences > 0) {
@@ -149,19 +202,66 @@ void fbcsaLut2(string bs, string ss, const char *textFileName, unsigned int quer
 	delete[] indexCounts;
 	delete fbcsaLut2;
 	delete P;
-        exit(0);
+    exit(0);
 }
 
-void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
-	FBCSA *fbcsa;
-        string indexFileNameString = "FBCSA-" + hTType + "-" + (string)textFileName + "-" +  bs + "-" + ss + ".idx";
+void fbcsa64Lut2(string ss, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSALut2<64> *fbcsaLut2 = new FBCSALut2<64>(atoi(ss.c_str()));
+    string indexFileNameString = "FBCSALut2-" + (string)textFileName + "-64-" + ss + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
 
 	if (fileExists(indexFileName)) {
-		fbcsa = new FBCSA();
+		fbcsaLut2->load(indexFileName);
+	} else {
+		fbcsaLut2->setVerbose(true);
+		fbcsaLut2->build(textFileName);
+		fbcsaLut2->save(indexFileName);
+	}
+
+	Patterns *P = new Patterns(textFileName, queriesNum, m);
+	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
+	unsigned char **patterns = P->getPatterns();
+	unsigned int *indexCounts = new unsigned int[queriesNum];
+
+	timer.startTimer();
+	for (unsigned int i = 0; i < queriesNum; ++i) {
+		indexCounts[i] = fbcsaLut2->count(patterns[i], m);
+	}
+	timer.stopTimer();
+
+	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSALut2.txt";
+	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
+	double size = (double)fbcsaLut2->getIndexSize() / (double)fbcsaLut2->getTextSize();
+	cout << "count FBCSALut2-64-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 64 " << ss << " " << size << " " << timer.getElapsedTime();
+
+	unsigned int differences = P->getErrorCountsNumber(indexCounts);
+	if (differences > 0) {
+		cout << "DIFFERENCES: " << differences << endl;
+		resultFile << " DIFFERENCES: " << differences;
+	} else {
+		cout << "Differences: " << differences << endl;
+	}
+	resultFile << endl;
+	resultFile.close();
+
+	delete[] indexCounts;
+	delete fbcsaLut2;
+	delete P;
+    exit(0);
+}
+
+void fbcsa32Hash(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSAHash<32,HTType::STANDARD> *fbcsa = new FBCSAHash<32,HTType::STANDARD>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+    string indexFileNameString = "FBCSA-hash-" + (string)textFileName + "-32-" + ss + "-" + k + "-" + loadFactor + ".idx";
+	const char *indexFileName = indexFileNameString.c_str();
+
+	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa = new FBCSA(atoi(bs.c_str()), atoi(ss.c_str()), hashTypesMap[hTType], atoi(k.c_str()), atof(loadFactor.c_str()));
 		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
@@ -169,10 +269,10 @@ void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor,
 
 	Patterns *P = new Patterns(textFileName, queriesNum, m);
 	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-        /*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
-        queriesNum = P->getQueriesNum();
-        if (queriesNum == 0) exit(1);*/
-        unsigned char **patterns = P->getPatterns();
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
+	unsigned char **patterns = P->getPatterns();
 	unsigned int *indexCounts = new unsigned int[queriesNum];
 
 	timer.startTimer();
@@ -181,11 +281,11 @@ void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor,
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSA-" + hTType + ".txt";
+	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSA-hash.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
-	cout << "count FBCSA-" << hTType << "-" << bs << "-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
-	resultFile << m << " " << queriesNum << " " << bs << " " << ss << " " << size << " " << timer.getElapsedTime();
+	cout << "count FBCSA-hash-32-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 32 " << ss << " " << k << " " << loadFactor << " " << size << " " << timer.getElapsedTime();
 
 	unsigned int differences = P->getErrorCountsNumber(indexCounts);
 	if (differences > 0) {
@@ -200,5 +300,152 @@ void fbcsaHash(string bs, string ss, string hTType, string k, string loadFactor,
 	delete[] indexCounts;
 	delete fbcsa;
 	delete P;
-        exit(0);
+    exit(0);
+}
+
+void fbcsa64Hash(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSAHash<64, HTType::STANDARD> *fbcsa = new FBCSAHash<64, HTType::STANDARD>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+    string indexFileNameString = "FBCSA-hash-" + (string)textFileName + "-64-" + ss + "-" + k + "-" + loadFactor + ".idx";
+	const char *indexFileName = indexFileNameString.c_str();
+
+	if (fileExists(indexFileName)) {
+		fbcsa->load(indexFileName);
+	} else {
+		fbcsa->setVerbose(true);
+		fbcsa->build(textFileName);
+		fbcsa->save(indexFileName);
+	}
+
+	Patterns *P = new Patterns(textFileName, queriesNum, m);
+	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
+	unsigned char **patterns = P->getPatterns();
+	unsigned int *indexCounts = new unsigned int[queriesNum];
+
+	timer.startTimer();
+	for (unsigned int i = 0; i < queriesNum; ++i) {
+		indexCounts[i] = fbcsa->count(patterns[i], m);
+	}
+	timer.stopTimer();
+
+	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSA-hash.txt";
+	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
+	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
+	cout << "count FBCSA-hash-64-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 64 " << ss << " " << k << " " << loadFactor << " " << size << " " << timer.getElapsedTime();
+
+	unsigned int differences = P->getErrorCountsNumber(indexCounts);
+	if (differences > 0) {
+		cout << "DIFFERENCES: " << differences << endl;
+		resultFile << " DIFFERENCES: " << differences;
+	} else {
+		cout << "Differences: " << differences << endl;
+	}
+	resultFile << endl;
+	resultFile.close();
+
+	delete[] indexCounts;
+	delete fbcsa;
+	delete P;
+    exit(0);
+}
+
+void fbcsa32HashDense(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSAHash<32, HTType::DENSE> *fbcsa = new FBCSAHash<32, HTType::DENSE>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+    string indexFileNameString = "FBCSA-hash-dense-" + (string)textFileName + "-32-" + ss + "-" + k + "-" + loadFactor + ".idx";
+	const char *indexFileName = indexFileNameString.c_str();
+
+	if (fileExists(indexFileName)) {
+		fbcsa->load(indexFileName);
+	} else {
+		fbcsa->setVerbose(true);
+		fbcsa->build(textFileName);
+		fbcsa->save(indexFileName);
+	}
+
+	Patterns *P = new Patterns(textFileName, queriesNum, m);
+	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
+	unsigned char **patterns = P->getPatterns();
+	unsigned int *indexCounts = new unsigned int[queriesNum];
+
+	timer.startTimer();
+	for (unsigned int i = 0; i < queriesNum; ++i) {
+		indexCounts[i] = fbcsa->count(patterns[i], m);
+	}
+	timer.stopTimer();
+
+	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSA-hash-dense.txt";
+	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
+	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
+	cout << "count FBCSA-hash-dense-32-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 32 " << ss << " " << k << " " << loadFactor << " " << size << " " << timer.getElapsedTime();
+
+	unsigned int differences = P->getErrorCountsNumber(indexCounts);
+	if (differences > 0) {
+		cout << "DIFFERENCES: " << differences << endl;
+		resultFile << " DIFFERENCES: " << differences;
+	} else {
+		cout << "Differences: " << differences << endl;
+	}
+	resultFile << endl;
+	resultFile.close();
+
+	delete[] indexCounts;
+	delete fbcsa;
+	delete P;
+    exit(0);
+}
+
+void fbcsa64HashDense(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
+	FBCSAHash<64, HTType::DENSE> *fbcsa = new FBCSAHash<64, HTType::DENSE>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+    string indexFileNameString = "FBCSA-hash-dense-" + (string)textFileName + "-64-" + ss + "-" + k + "-" + loadFactor + ".idx";
+	const char *indexFileName = indexFileNameString.c_str();
+
+	if (fileExists(indexFileName)) {
+		fbcsa->load(indexFileName);
+	} else {
+		fbcsa->setVerbose(true);
+		fbcsa->build(textFileName);
+		fbcsa->save(indexFileName);
+	}
+
+	Patterns *P = new Patterns(textFileName, queriesNum, m);
+	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
+	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	queriesNum = P->getQueriesNum();
+	if (queriesNum == 0) exit(1);*/
+	unsigned char **patterns = P->getPatterns();
+	unsigned int *indexCounts = new unsigned int[queriesNum];
+
+	timer.startTimer();
+	for (unsigned int i = 0; i < queriesNum; ++i) {
+		indexCounts[i] = fbcsa->count(patterns[i], m);
+	}
+	timer.stopTimer();
+
+	string resultFileName = "results/fbcsa/" + string(textFileName) + "_count_FBCSA-hash-dense.txt";
+	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
+	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
+	cout << "count FBCSA-hash-dense-64-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
+	resultFile << m << " " << queriesNum << " 64 " << ss << " " << k << " " << loadFactor << " " << size << " " << timer.getElapsedTime();
+
+	unsigned int differences = P->getErrorCountsNumber(indexCounts);
+	if (differences > 0) {
+		cout << "DIFFERENCES: " << differences << endl;
+		resultFile << " DIFFERENCES: " << differences;
+	} else {
+		cout << "Differences: " << differences << endl;
+	}
+	resultFile << endl;
+	resultFile.close();
+
+	delete[] indexCounts;
+	delete fbcsa;
+	delete P;
+    exit(0);
 }

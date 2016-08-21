@@ -2,6 +2,7 @@
 #define SHARED_COMMON_H_
 
 #include <string.h>
+#include <fstream>
 #include <vector>
 
 using namespace std;
