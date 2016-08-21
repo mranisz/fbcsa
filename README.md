@@ -75,9 +75,8 @@ Parameters:
 - ss - sampling step (default: ss = 5)
 
 Limitations: 
-- BS > 0
+- BS > 0 and ss > 0
 - BS must be a multiple of 32
-- ss > 0
 
 Constructors:
 ```
@@ -99,9 +98,8 @@ Parameters:
 
 Limitations:
 - pattern length ≥ k (patterns shorter than k are handled by standard variant of FBCSA index)
-- BS > 0
+- BS > 0 and ss > 0
 - BS must be a multiple of 32
-- ss > 0
 
 Constructors:
 ```
@@ -117,9 +115,8 @@ Parameters:
 
 Limitations: 
 - pattern length ≥ 2 (patterns shorter than 2 are handled by standard variant of FBCSA index)
-- BS > 0
+- BS > 0 and ss > 0
 - BS must be a multiple of 32
-- ss > 0
 
 Constructors:
 ```
