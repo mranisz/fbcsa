@@ -93,13 +93,15 @@ Parameters:
       - HTType::STANDARD - using 8 bytes for each hashed entry: 4 bytes for left boundary + 4 bytes for right boundary
       - HTType::DENSE - using 6 bytes for each hashed entry: 4 bytes for left boundary + 2 bytes for right boundary
 - ss - sampling step
-- k - length of prefixes of suffixes from suffix array (k ≥ 2)
-- loadFactor - hash table load factor (0.0 < loadFactor < 1.0)
+- k - length of prefixes of suffixes from suffix array
+- loadFactor - hash table load factor
 
 Limitations:
 - pattern length ≥ k (patterns shorter than k are handled by standard variant of FBCSA index)
 - BS > 0 and ss > 0
 - BS must be a multiple of 32
+- k ≥ 2
+- 0.0 < loadFactor < 1.0
 
 Constructors:
 ```

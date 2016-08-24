@@ -92,7 +92,7 @@ public:
             if (this->denseBoundariesHTLen > 0) fwrite(this->alignedDenseBoundariesHT, (size_t)sizeof(unsigned int), (size_t)this->denseBoundariesHTLen, outFile);
         }
         
-	void loadBase(FILE *inFile) {
+	void load(FILE *inFile) {
             this->free();
             size_t result;
             result = fread(&this->loadFactor, (size_t)sizeof(double), (size_t)1, inFile);
@@ -368,10 +368,6 @@ public:
                     this->fillStandardHTData(text, textLen, sa, saLen);
                     break;
             }
-        }
-        
-        void load(FILE *inFile) {
-            this->loadBase(inFile);
         }
         
         void getBoundaries(unsigned char *pattern, unsigned char *text, unsigned int *sa, unsigned int &leftBoundary, unsigned int &rightBoundary) {
