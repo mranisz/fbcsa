@@ -66,7 +66,6 @@ void fbcsa32(string ss, const char *textFileName, unsigned int queriesNum, unsig
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
@@ -115,7 +114,6 @@ void fbcsa64(string ss, const char *textFileName, unsigned int queriesNum, unsig
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
@@ -164,7 +162,6 @@ void fbcsa32Lut2(string ss, const char *textFileName, unsigned int queriesNum, u
 	if (fileExists(indexFileName)) {
 		fbcsaLut2->load(indexFileName);
 	} else {
-		fbcsaLut2->setVerbose(true);
 		fbcsaLut2->build(textFileName);
 		fbcsaLut2->save(indexFileName);
 	}
@@ -213,7 +210,6 @@ void fbcsa64Lut2(string ss, const char *textFileName, unsigned int queriesNum, u
 	if (fileExists(indexFileName)) {
 		fbcsaLut2->load(indexFileName);
 	} else {
-		fbcsaLut2->setVerbose(true);
 		fbcsaLut2->build(textFileName);
 		fbcsaLut2->save(indexFileName);
 	}
@@ -262,7 +258,6 @@ void fbcsa32Hash(string ss, string k, string loadFactor, const char *textFileNam
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
@@ -311,7 +306,6 @@ void fbcsa64Hash(string ss, string k, string loadFactor, const char *textFileNam
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
@@ -360,7 +354,6 @@ void fbcsa32HashDense(string ss, string k, string loadFactor, const char *textFi
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
@@ -409,7 +402,6 @@ void fbcsa64HashDense(string ss, string k, string loadFactor, const char *textFi
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}

@@ -44,7 +44,6 @@ void fbcsa32(string ss, const char *textFileName, unsigned int seqNum, unsigned 
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}
@@ -97,7 +96,6 @@ void fbcsa64(string ss, const char *textFileName, unsigned int seqNum, unsigned 
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}

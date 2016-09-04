@@ -63,10 +63,6 @@ unsigned int count(unsigned char *pattern, unsigned int patternLen);
 ```
 void locate(unsigned char *pattern, unsigned int patternLen, vector<unsigned int>& res);
 ```
-- set **verbose** mode:
-```
-void setVerbose(bool verbose);
-```
 
 ##FBCSA\<unsigned int BS\>
 
@@ -148,7 +144,6 @@ int main(int argc, char *argv[]) {
 	if (fileExists(indexFileName)) {
 		fbcsa->load(indexFileName);
 	} else {
-		fbcsa->setVerbose(true);
 		fbcsa->build(textFileName);
 		fbcsa->save(indexFileName);
 	}

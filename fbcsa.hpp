@@ -14,7 +14,7 @@ using namespace shared;
 
 namespace fbcsa {
     
-template<unsigned int BS> class FBCSA : public Index {
+template<unsigned int BS> class FBCSA {
 protected:
 	unsigned int *arr1;
         unsigned int *alignedArr1;
@@ -55,7 +55,7 @@ protected:
         }
         
         void loadText(const char *textFileName) {
-            if (this->verbose) cout << "Loading text ... " << flush;
+            cout << "Loading text ... " << flush;
             this->textLen = getFileSize(textFileName, sizeof(unsigned char));
             this->text = new unsigned char[this->textLen + 128 + 1];
             this->alignedText = this->text;
@@ -70,7 +70,7 @@ protected:
             }
             fclose(inFile);
             checkNullChar(this->alignedText, this->textLen);
-            if (this->verbose) cout << "Done" << endl;
+            cout << "Done" << endl;
         }
         
         string getMostCommonCharsInBlock(unsigned char *block) {
@@ -147,18 +147,18 @@ protected:
         void buildIndex(unsigned int *sa, unsigned int saLen) {
             unsigned int bwtLen;
             unsigned int addLen = BS - ((this->textLen + 1) % BS);
-            unsigned char *bwt = getBWT(this->alignedText, this->textLen, sa, saLen, bwtLen, addLen, this->verbose);
+            unsigned char *bwt = getBWT(this->alignedText, this->textLen, sa, saLen, bwtLen, addLen);
 
             for (unsigned int i = saLen; i < saLen + addLen; ++i) sa[i] = 0;
             for (unsigned int i = bwtLen; i < bwtLen + addLen; ++i) bwt[i] = bwt[i - 1];
 
-            if (this->verbose) cout << "Building inverse SA ... " << flush;
+            cout << "Building inverse SA ... " << flush;
             unsigned int *saInv = new unsigned int[saLen];
             for (unsigned int i = 0; i < saLen; i++) saInv[i] = 0;
             for (unsigned int i = 0; i < saLen; i++) saInv[sa[i]] = i;
-            if (this->verbose) cout << "Done" << endl;
+            cout << "Done" << endl;
 
-            if (this->verbose) cout << "Building FBCSA index ... " << flush;
+            cout << "Building FBCSA index ... " << flush;
             this->arr1Len = (bwtLen / BS + 1) * (BS / 16 + BS / 32 + 1);
             this->arr1 = new unsigned int[this->arr1Len + 32];
             this->alignedArr1 = this->arr1;
@@ -174,7 +174,7 @@ protected:
             unsigned int arr2Index = 0;
             for (unsigned int i = 0; i < (bwtLen - BS + 1); i += BS) this->buildArraysForBlock(bwt + i, sa + i, saInv, arr1Index, arr2Index);
             if (bwtLen % BS > 0) this->buildArraysForBlock(bwt + bwtLen - (bwtLen % BS), sa + bwtLen - (bwtLen % BS), saInv, arr1Index, arr2Index);
-            if (this->verbose) cout << "Done" << endl;
+            cout << "Done" << endl;
 
             delete[] saInv;
             delete[] bwt;
@@ -674,18 +674,14 @@ public:
             this->loadText(textFileName);
 
             unsigned int saLen;
-            unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, BS - ((this->textLen + 1) % BS), this->verbose);
+            unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, BS - ((this->textLen + 1) % BS));
 
             this->buildIndex(sa, saLen);
         
             delete[] sa;
         }
         
-	void save(const char *fileName) {
-            if (this->verbose) cout << "Saving index in " << fileName << " ... " << flush;
-            FILE *outFile;
-            outFile = fopen(fileName, "w");
-            fwrite(&this->verbose, (size_t)sizeof(bool), (size_t)1, outFile);
+        void save(FILE *outFile) {
             fwrite(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, outFile);
             fwrite(&this->arr1Len, (size_t)sizeof(unsigned int), (size_t)1, outFile);
             if (this->arr1Len > 0) fwrite(this->alignedArr1, (size_t)sizeof(unsigned int), (size_t)this->arr1Len, outFile);
@@ -693,29 +689,28 @@ public:
             if (this->arr2Len > 0) fwrite(this->alignedArr2, (size_t)sizeof(unsigned int), (size_t)this->arr2Len, outFile);
             fwrite(&this->textLen, (size_t)sizeof(unsigned int), (size_t)1, outFile);
             if (this->textLen > 0) fwrite(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, outFile);
-            fclose(outFile);
-            if (this->verbose) cout << "Done" << endl;
         }
         
-	void load(const char *fileName) { 
+	void save(const char *fileName) {
+            cout << "Saving index in " << fileName << " ... " << flush;
+            FILE *outFile;
+            outFile = fopen(fileName, "w");
+            this->save(outFile);
+            fclose(outFile);
+            cout << "Done" << endl;
+        }
+        
+	void load(FILE *inFile) { 
             this->free();
-            FILE *inFile;
-            inFile = fopen(fileName, "rb");
             size_t result;
-            result = fread(&this->verbose, (size_t)sizeof(bool), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->verbose) cout << "Loading index from " << fileName << " ... " << flush;
             result = fread(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, inFile);
             if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
+                    cout << "Error loading index" << endl;
                     exit(1);
             }
             result = fread(&this->arr1Len, (size_t)sizeof(unsigned int), (size_t)1, inFile);
             if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
+                    cout << "Error loading index" << endl;
                     exit(1);
             }
             if (this->arr1Len > 0) {
@@ -724,13 +719,13 @@ public:
                     while ((unsigned long long)this->alignedArr1 % 128) ++this->alignedArr1;
                     result = fread(this->alignedArr1, (size_t)sizeof(unsigned int), (size_t)this->arr1Len, inFile);
                     if (result != this->arr1Len) {
-                            cout << "Error loading index from " << fileName << endl;
+                            cout << "Error loading index" << endl;
                             exit(1);
                     }
             }
             result = fread(&this->arr2Len, (size_t)sizeof(unsigned int), (size_t)1, inFile);
             if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
+                    cout << "Error loading index" << endl;
                     exit(1);
             }
             if (this->arr2Len > 0) {
@@ -739,13 +734,13 @@ public:
                     while ((unsigned long long)this->alignedArr2 % 128) ++this->alignedArr2;
                     result = fread(this->alignedArr2, (size_t)sizeof(unsigned int), (size_t)this->arr2Len, inFile);
                     if (result != this->arr2Len) {
-                            cout << "Error loading index from " << fileName << endl;
+                            cout << "Error loading index" << endl;
                             exit(1);
                     }
             }
             result = fread(&this->textLen, (size_t)sizeof(unsigned int), (size_t)1, inFile);
             if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
+                    cout << "Error loading index" << endl;
                     exit(1);
             }
             if (this->textLen > 0) {
@@ -755,12 +750,19 @@ public:
                     result = fread(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, inFile);
                     this->alignedText[this->textLen] = '\0';
                     if (result != this->textLen) {
-                            cout << "Error loading index from " << fileName << endl;
+                            cout << "Error loading index" << endl;
                             exit(1);
                     }
             }
+        }
+        
+        void load(const char *fileName) { 
+            FILE *inFile;
+            inFile = fopen(fileName, "rb");
+            cout << "Loading index from " << fileName << " ... " << flush;
+            this->load(inFile);
             fclose(inFile);
-            if (this->verbose) cout << "Done" << endl;
+            cout << "Done" << endl;
         }
         
 	void free() {
@@ -921,101 +923,47 @@ public:
             this->loadText(textFileName);
 
             unsigned int saLen;
-            unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, BS - ((this->textLen + 1) % BS), this->verbose);
+            unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, BS - ((this->textLen + 1) % BS));
 
             this->buildIndex(sa, saLen);
 
-            if (this->verbose) cout << "Building hash table ... " << flush;
+            cout << "Building hash table ... " << flush;
             this->ht->build(this->alignedText, this->textLen, sa, saLen);
-            if (this->verbose) cout << "Done" << endl;
+            cout << "Done" << endl;
 
             delete[] sa;
         }
         
-	void save(const char *fileName) {
-            if (this->verbose) cout << "Saving index in " << fileName << " ... " << flush;
-            FILE *outFile;
-            outFile = fopen(fileName, "w");
-            fwrite(&this->verbose, (size_t)sizeof(bool), (size_t)1, outFile);
-            fwrite(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            fwrite(&this->arr1Len, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            if (this->arr1Len > 0) fwrite(this->alignedArr1, (size_t)sizeof(unsigned int), (size_t)this->arr1Len, outFile);
-            fwrite(&this->arr2Len, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            if (this->arr2Len > 0) fwrite(this->alignedArr2, (size_t)sizeof(unsigned int), (size_t)this->arr2Len, outFile);
-            fwrite(&this->textLen, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            if (this->textLen > 0) fwrite(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, outFile);
+        void save(FILE *outFile) {
+            FBCSA<BS>::save(outFile);
             this->ht->save(outFile);
-            fclose(outFile);
-            if (this->verbose) cout << "Done" << endl;
         }
         
-	void load(const char *fileName) {
-            this->free();
-            FILE *inFile;
-            inFile = fopen(fileName, "rb");
-            size_t result;
-            result = fread(&this->verbose, (size_t)sizeof(bool), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->verbose) cout << "Loading index from " << fileName << " ... " << flush;
-            result = fread(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            result = fread(&this->arr1Len, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->arr1Len > 0) {
-                    this->arr1 = new unsigned int[this->arr1Len + 32];
-                    this->alignedArr1 = this->arr1;
-                    while ((unsigned long long)this->alignedArr1 % 128) ++this->alignedArr1;
-                    result = fread(this->alignedArr1, (size_t)sizeof(unsigned int), (size_t)this->arr1Len, inFile);
-                    if (result != this->arr1Len) {
-                            cout << "Error loading index from " << fileName << endl;
-                            exit(1);
-                    }
-            }
-            result = fread(&this->arr2Len, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->arr2Len > 0) {
-                    this->arr2 = new unsigned int[this->arr2Len + 32];
-                    this->alignedArr2 = this->arr2;
-                    while ((unsigned long long)this->alignedArr2 % 128) ++this->alignedArr2;
-                    result = fread(this->alignedArr2, (size_t)sizeof(unsigned int), (size_t)this->arr2Len, inFile);
-                    if (result != this->arr2Len) {
-                            cout << "Error loading index from " << fileName << endl;
-                            exit(1);
-                    }
-            }
-            result = fread(&this->textLen, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->textLen > 0) {
-                    this->text = new unsigned char[this->textLen + 128 + 1];
-                    this->alignedText = this->text;
-                    while ((unsigned long long)this->alignedText % 128) ++this->alignedText;
-                    result = fread(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, inFile);
-                    this->alignedText[this->textLen] = '\0';
-                    if (result != this->textLen) {
-                            cout << "Error loading index from " << fileName << endl;
-                            exit(1);
-                    }
-            }
+	void save(const char *fileName) {
+            cout << "Saving index in " << fileName << " ... " << flush;
+            FILE *outFile;
+            outFile = fopen(fileName, "w");
+            this->save(outFile);
+            fclose(outFile);
+            cout << "Done" << endl;
+        }
+        
+	void load(FILE *inFile) {
+            FBCSA<BS>::load(inFile);
             delete this->ht;
             this->ht = new HT<HASHTYPE>();
             this->ht->load(inFile);
             fclose(inFile);
-            if (this->verbose) cout << "Done" << endl;
+            cout << "Done" << endl;
+        }
+        
+        void load(const char *fileName) {
+            FILE *inFile;
+            inFile = fopen(fileName, "rb");
+            cout << "Loading index from " << fileName << " ... " << flush;
+            this->load(inFile);
+            fclose(inFile);
+            cout << "Done" << endl;
         }
         
 	void free() {
@@ -1069,7 +1017,7 @@ public:
             this->loadText(textFileName);
 
             unsigned int saLen;
-            unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, BS - ((this->textLen + 1) % BS), this->verbose);
+            unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, BS - ((this->textLen + 1) % BS));
 
             this->buildIndex(sa, saLen);
 
@@ -1078,92 +1026,36 @@ public:
             delete[] sa;
         }
         
-        void save(const char *fileName) {
-            if (this->verbose) cout << "Saving index in " << fileName << " ... " << flush;
-            FILE *outFile;
-            outFile = fopen(fileName, "w");
-            fwrite(&this->verbose, (size_t)sizeof(bool), (size_t)1, outFile);
-            fwrite(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            fwrite(&this->arr1Len, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            if (this->arr1Len > 0) fwrite(this->alignedArr1, (size_t)sizeof(unsigned int), (size_t)this->arr1Len, outFile);
-            fwrite(&this->arr2Len, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            if (this->arr2Len > 0) fwrite(this->alignedArr2, (size_t)sizeof(unsigned int), (size_t)this->arr2Len, outFile);
-            fwrite(&this->textLen, (size_t)sizeof(unsigned int), (size_t)1, outFile);
-            if (this->textLen > 0) fwrite(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, outFile);
+        void save(FILE *outFile) {
+            FBCSA<BS>::save(outFile);
             fwrite(&this->lut2, (size_t)sizeof(unsigned int), (size_t)(256 * 256 * 2), outFile);
-            fclose(outFile);
-            if (this->verbose) cout << "Done" << endl;
         }
         
-	void load(const char *fileName) {
-            this->free();
-            FILE *inFile;
-            inFile = fopen(fileName, "rb");
-            size_t result;
-            result = fread(&this->verbose, (size_t)sizeof(bool), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->verbose) cout << "Loading index from " << fileName << " ... " << flush;
-            result = fread(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            result = fread(&this->arr1Len, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->arr1Len > 0) {
-                    this->arr1 = new unsigned int[this->arr1Len + 32];
-                    this->alignedArr1 = this->arr1;
-                    while ((unsigned long long)this->alignedArr1 % 128) ++this->alignedArr1;
-                    result = fread(this->alignedArr1, (size_t)sizeof(unsigned int), (size_t)this->arr1Len, inFile);
-                    if (result != this->arr1Len) {
-                            cout << "Error loading index from " << fileName << endl;
-                            exit(1);
-                    }
-            }
-            result = fread(&this->arr2Len, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->arr2Len > 0) {
-                    this->arr2 = new unsigned int[this->arr2Len + 32];
-                    this->alignedArr2 = this->arr2;
-                    while ((unsigned long long)this->alignedArr2 % 128) ++this->alignedArr2;
-                    result = fread(this->alignedArr2, (size_t)sizeof(unsigned int), (size_t)this->arr2Len, inFile);
-                    if (result != this->arr2Len) {
-                            cout << "Error loading index from " << fileName << endl;
-                            exit(1);
-                    }
-            }
-            result = fread(&this->textLen, (size_t)sizeof(unsigned int), (size_t)1, inFile);
-            if (result != 1) {
-                    cout << "Error loading index from " << fileName << endl;
-                    exit(1);
-            }
-            if (this->textLen > 0) {
-                    this->text = new unsigned char[this->textLen + 128 + 1];
-                    this->alignedText = this->text;
-                    while ((unsigned long long)this->alignedText % 128) ++this->alignedText;
-                    result = fread(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, inFile);
-                    this->alignedText[this->textLen] = '\0';
-                    if (result != this->textLen) {
-                            cout << "Error loading index from " << fileName << endl;
-                            exit(1);
-                    }
-            }
-            result = fread(this->lut2, (size_t)sizeof(unsigned int), (size_t)(256 * 256 * 2), inFile);
+        void save(const char *fileName) {
+            cout << "Saving index in " << fileName << " ... " << flush;
+            FILE *outFile;
+            outFile = fopen(fileName, "w");
+            this->save(outFile);
+            fclose(outFile);
+            cout << "Done" << endl;
+        }
+        
+	void load(FILE *inFile) {
+            FBCSA<BS>::load(inFile);
+            size_t result = fread(this->lut2, (size_t)sizeof(unsigned int), (size_t)(256 * 256 * 2), inFile);
             if (result != (256 * 256 * 2)) {
                     cout << "Error loading index" << endl;
                     exit(1);
             }
+        }
+        
+        void load(const char *fileName) { 
+            FILE *inFile;
+            inFile = fopen(fileName, "rb");
+            cout << "Loading index from " << fileName << " ... " << flush;
+            this->load(inFile);
             fclose(inFile);
-            if (this->verbose) cout << "Done" << endl;
+            cout << "Done" << endl;
         }
         
         unsigned int getIndexSize() {
