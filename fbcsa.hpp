@@ -60,8 +60,7 @@ protected:
             this->text = new unsigned char[this->textLen + 128 + 1];
             this->alignedText = this->text;
             while ((unsigned long long)this->alignedText % 128) ++this->alignedText;
-            FILE *inFile;
-            inFile = fopen(textFileName, "rb");
+            FILE *inFile = fopen(textFileName, "rb");
             size_t result = fread(this->alignedText, (size_t)sizeof(unsigned char), (size_t)this->textLen, inFile);
             this->alignedText[this->textLen] = '\0';
             if (result != this->textLen) {
@@ -693,8 +692,7 @@ public:
         
 	void save(const char *fileName) {
             cout << "Saving index in " << fileName << " ... " << flush;
-            FILE *outFile;
-            outFile = fopen(fileName, "w");
+            FILE *outFile = fopen(fileName, "w");
             this->save(outFile);
             fclose(outFile);
             cout << "Done" << endl;
@@ -702,8 +700,7 @@ public:
         
 	void load(FILE *inFile) { 
             this->free();
-            size_t result;
-            result = fread(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, inFile);
+            size_t result = fread(&this->ss, (size_t)sizeof(unsigned int), (size_t)1, inFile);
             if (result != 1) {
                     cout << "Error loading index" << endl;
                     exit(1);
@@ -757,8 +754,7 @@ public:
         }
         
         void load(const char *fileName) { 
-            FILE *inFile;
-            inFile = fopen(fileName, "rb");
+            FILE *inFile = fopen(fileName, "rb");
             cout << "Loading index from " << fileName << " ... " << flush;
             this->load(inFile);
             fclose(inFile);
@@ -941,8 +937,7 @@ public:
         
 	void save(const char *fileName) {
             cout << "Saving index in " << fileName << " ... " << flush;
-            FILE *outFile;
-            outFile = fopen(fileName, "w");
+            FILE *outFile = fopen(fileName, "w");
             this->save(outFile);
             fclose(outFile);
             cout << "Done" << endl;
@@ -953,13 +948,10 @@ public:
             delete this->ht;
             this->ht = new HT<HASHTYPE>();
             this->ht->load(inFile);
-            fclose(inFile);
-            cout << "Done" << endl;
         }
         
         void load(const char *fileName) {
-            FILE *inFile;
-            inFile = fopen(fileName, "rb");
+            FILE *inFile = fopen(fileName, "rb");
             cout << "Loading index from " << fileName << " ... " << flush;
             this->load(inFile);
             fclose(inFile);
@@ -1033,8 +1025,7 @@ public:
         
         void save(const char *fileName) {
             cout << "Saving index in " << fileName << " ... " << flush;
-            FILE *outFile;
-            outFile = fopen(fileName, "w");
+            FILE *outFile = fopen(fileName, "w");
             this->save(outFile);
             fclose(outFile);
             cout << "Done" << endl;
@@ -1050,8 +1041,7 @@ public:
         }
         
         void load(const char *fileName) { 
-            FILE *inFile;
-            inFile = fopen(fileName, "rb");
+            FILE *inFile = fopen(fileName, "rb");
             cout << "Loading index from " << fileName << " ... " << flush;
             this->load(inFile);
             fclose(inFile);
