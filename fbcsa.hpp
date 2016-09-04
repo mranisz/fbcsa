@@ -894,7 +894,7 @@ protected:
         
         void getBoundaries(unsigned char *pattern, unsigned int &leftBoundary, unsigned int &rightBoundary) {
             switch(HASHTYPE) {
-                case HTType::DENSE:
+                case HTType::HT_DENSE:
                     getDenseHTBoundaries(pattern, leftBoundary, rightBoundary);
                     break;
                 default:

@@ -255,7 +255,7 @@ void fbcsa64Lut2(string ss, const char *textFileName, unsigned int queriesNum, u
 }
 
 void fbcsa32Hash(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
-	FBCSAHash<32,HTType::STANDARD> *fbcsa = new FBCSAHash<32,HTType::STANDARD>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+	FBCSAHash<32, HT_STANDARD> *fbcsa = new FBCSAHash<32, HT_STANDARD>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
     string indexFileNameString = "FBCSA-hash-" + (string)textFileName + "-32-" + ss + "-" + k + "-" + loadFactor + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
 
@@ -304,7 +304,7 @@ void fbcsa32Hash(string ss, string k, string loadFactor, const char *textFileNam
 }
 
 void fbcsa64Hash(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
-	FBCSAHash<64, HTType::STANDARD> *fbcsa = new FBCSAHash<64, HTType::STANDARD>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+	FBCSAHash<64, HT_STANDARD> *fbcsa = new FBCSAHash<64, HT_STANDARD>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
     string indexFileNameString = "FBCSA-hash-" + (string)textFileName + "-64-" + ss + "-" + k + "-" + loadFactor + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
 
@@ -353,7 +353,7 @@ void fbcsa64Hash(string ss, string k, string loadFactor, const char *textFileNam
 }
 
 void fbcsa32HashDense(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
-	FBCSAHash<32, HTType::DENSE> *fbcsa = new FBCSAHash<32, HTType::DENSE>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+	FBCSAHash<32, HT_DENSE> *fbcsa = new FBCSAHash<32, HT_DENSE>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
     string indexFileNameString = "FBCSA-hash-dense-" + (string)textFileName + "-32-" + ss + "-" + k + "-" + loadFactor + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
 
@@ -402,7 +402,7 @@ void fbcsa32HashDense(string ss, string k, string loadFactor, const char *textFi
 }
 
 void fbcsa64HashDense(string ss, string k, string loadFactor, const char *textFileName, unsigned int queriesNum, unsigned int m) {
-	FBCSAHash<64, HTType::DENSE> *fbcsa = new FBCSAHash<64, HTType::DENSE>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
+	FBCSAHash<64, HT_DENSE> *fbcsa = new FBCSAHash<64, HT_DENSE>(atoi(ss.c_str()), atoi(k.c_str()), atof(loadFactor.c_str()));
     string indexFileNameString = "FBCSA-hash-dense-" + (string)textFileName + "-64-" + ss + "-" + k + "-" + loadFactor + ".idx";
 	const char *indexFileName = indexFileNameString.c_str();
 
