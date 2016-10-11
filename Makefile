@@ -20,9 +20,9 @@ locateFBCSA: test/locateFBCSA.cpp libfbcsa.a libs/$(ASMLIB)
 extractFBCSA: test/extractFBCSA.cpp libfbcsa.a libs/$(ASMLIB)
 	$(CXX) $(CFLAGS) test/extractFBCSA.cpp libfbcsa.a libs/$(ASMLIB) -o test/extractFBCSA
 
-libfbcsa.a: fbcsa.hpp shared/common.h shared/common.cpp shared/patterns.h shared/patterns.cpp shared/sakeys.h shared/sakeys.cpp shared/timer.h shared/timer.cpp shared/sais.h shared/sais.c shared/xxhash.h shared/xxhash.c shared/hash.hpp
-	$(CXX) $(CFLAGS) -c shared/common.cpp shared/patterns.cpp shared/sakeys.cpp shared/timer.cpp shared/sais.c shared/xxhash.c
-	ar rcs libfbcsa.a fbcsa.hpp common.o patterns.o sakeys.o timer.o sais.o xxhash.o shared/hash.hpp
+libfbcsa.a: fbcsa.hpp shared/common.hpp shared/patterns.hpp shared/timer.hpp shared/sais.h shared/sais.c shared/xxhash.h shared/xxhash.c shared/hash.hpp
+	$(CXX) $(CFLAGS) -c shared/sais.c shared/xxhash.c
+	ar rcs libfbcsa.a fbcsa.hpp sais.o xxhash.o shared/common.hpp shared/patterns.hpp shared/hash.hpp shared/timer.hpp
 	make cleanObjects
 
 cleanObjects:

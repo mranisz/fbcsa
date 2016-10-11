@@ -2,8 +2,8 @@
 #include <fstream>
 #include <string>
 #include <stdlib.h>
-#include "../shared/sakeys.h"
-#include "../shared/timer.h"
+#include "../shared/patterns.hpp"
+#include "../shared/timer.hpp"
 #include "../fbcsa.hpp"
 
 using namespace std;

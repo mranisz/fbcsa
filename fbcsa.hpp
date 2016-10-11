@@ -6,7 +6,7 @@
 #include <math.h>
 #include <cstdio>
 #include "libs/asmlib.h"
-#include "shared/common.h"
+#include "shared/common.hpp"
 #include "shared/hash.hpp"
 
 using namespace std;
@@ -826,7 +826,7 @@ public:
 
 template<unsigned int BS, HTType HASHTYPE> class FBCSAHash : public FBCSA<BS> {
 protected:
-	HT<HASHTYPE> *ht = NULL;
+	HT32<HASHTYPE> *ht = NULL;
 
 	void freeMemory() {
             FBCSA<BS>::freeMemory();
@@ -844,7 +844,7 @@ protected:
                         rightBoundary = this->ht->alignedBoundariesHT[2 * hash + 1];
                         break;
                     }
-                    if (leftBoundary == HT<HASHTYPE>::emptyValueHT) {
+                    if (leftBoundary == HT32<HASHTYPE>::emptyValueHT) {
                         leftBoundary = 0;
                         rightBoundary = 0;
                         return;
@@ -874,7 +874,7 @@ protected:
                         else rightBoundary = (this->ht->alignedDenseBoundariesHT[hash / 2] & 0xFFFF) * step + leftBoundaryLUT2;
                         break;
                     }
-                    if (leftBoundary == HT<HASHTYPE>::emptyValueHT) {
+                    if (leftBoundary == HT32<HASHTYPE>::emptyValueHT) {
                         leftBoundary = 0;
                         rightBoundary = 0;
                         return;
@@ -906,7 +906,7 @@ public:
 	FBCSAHash(unsigned int ss, unsigned int k, double loadFactor) {
 		this->initialize();
                 this->setSs(ss);
-                this->ht = new HT<HASHTYPE>(k, loadFactor);
+                this->ht = new HT32<HASHTYPE>(k, loadFactor);
 	}
 
 	~FBCSAHash() {
@@ -946,7 +946,7 @@ public:
 	void load(FILE *inFile) {
             FBCSA<BS>::load(inFile);
             delete this->ht;
-            this->ht = new HT<HASHTYPE>();
+            this->ht = new HT32<HASHTYPE>();
             this->ht->load(inFile);
         }
         

@@ -3,8 +3,8 @@
 #include <string>
 #include <stdlib.h>
 #include <map>
-#include "../shared/patterns.h"
-#include "../shared/timer.h"
+#include "../shared/patterns.hpp"
+#include "../shared/timer.hpp"
 #include "../fbcsa.hpp"
 
 using namespace std;
@@ -70,9 +70,9 @@ void fbcsa32(string ss, const char *textFileName, unsigned int queriesNum, unsig
 		fbcsa->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -118,9 +118,9 @@ void fbcsa64(string ss, const char *textFileName, unsigned int queriesNum, unsig
 		fbcsa->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -166,9 +166,9 @@ void fbcsa32Lut2(string ss, const char *textFileName, unsigned int queriesNum, u
 		fbcsaLut2->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -214,9 +214,9 @@ void fbcsa64Lut2(string ss, const char *textFileName, unsigned int queriesNum, u
 		fbcsaLut2->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -262,9 +262,9 @@ void fbcsa32Hash(string ss, string k, string loadFactor, const char *textFileNam
 		fbcsa->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -310,9 +310,9 @@ void fbcsa64Hash(string ss, string k, string loadFactor, const char *textFileNam
 		fbcsa->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -358,9 +358,9 @@ void fbcsa32HashDense(string ss, string k, string loadFactor, const char *textFi
 		fbcsa->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();
@@ -406,9 +406,9 @@ void fbcsa64HashDense(string ss, string k, string loadFactor, const char *textFi
 		fbcsa->save(indexFileName);
 	}
 
-	Patterns *P = new Patterns(textFileName, queriesNum, m);
-	//NegativePatterns *P = new NegativePatterns(textFileName, queriesNum, m);
-	/*MaliciousPatterns *P = new MaliciousPatterns(textFileName, m);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, m);
+	//NegativePatterns32 *P = new NegativePatterns32(textFileName, queriesNum, m);
+	/*MaliciousPatterns32 *P = new MaliciousPatterns32(textFileName, m);
 	queriesNum = P->getQueriesNum();
 	if (queriesNum == 0) exit(1);*/
 	unsigned char **patterns = P->getPatterns();

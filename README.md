@@ -126,7 +126,7 @@ FBCSALut2<unsigned int BS>(unsigned int ss);
 ```
 #include <iostream>
 #include <stdlib.h>
-#include "fbcsa/shared/patterns.h"
+#include "fbcsa/shared/patterns.hpp"
 #include "fbcsa/fbcsa.hpp"
 
 using namespace std;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
 	double indexSize = (double)fbcsa->getIndexSize();
 	cout << "Index size: " << indexSize << "B (" << (indexSize / (double)fbcsa->getTextSize()) << "n)" << endl << endl;
 
-	Patterns *P = new Patterns(textFileName, queriesNum, patternLen);
+	Patterns32 *P = new Patterns32(textFileName, queriesNum, patternLen);
 	unsigned char **patterns = P->getPatterns();
 
 	for (unsigned int i = 0; i < queriesNum; ++i) {
