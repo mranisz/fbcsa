@@ -1,7 +1,7 @@
 # FBCSA text indexes library
 
 ##What is it?
-FBCSA (Fixed Block based Compact Suffix Array) is a compact text index, with space use of about 1.5n - 2.5n bytes (+1n bytes for the indexed text), depending on the indexed text characteristics and two construction-time parameters: block size and sampling step, which allows for relatively fast pattern search and access to an arbitrary T[i] symbol.
+FBCSA (Fixed Block based Compact Suffix Array) \[[1](#references)\] is a compact text index, with space use of about 1.5n - 2.5n bytes (+1n bytes for the indexed text), depending on the indexed text characteristics and two construction-time parameters: block size and sampling step, which allows for relatively fast pattern search and access to an arbitrary T[i] symbol.
 
 ##Requirements
 The FBCSA text indexes require:
@@ -168,6 +168,9 @@ Using other FBCSA indexes is analogous.
 - Suffix array building by Yuta Mori (sais)
 - A multi-platform library of highly optimized functions for C and C++ by Agner Fog (asmlib)
 - A very fast hash function by Yann Collet (xxHash)
+
+##References
+1. Sz. Grabowski, M. Raniszewski. Two simple full-text indexes based on the suffix array. arXiv:1405.5919, 2016
 
 ##Authors
 - Szymon Grabowski
