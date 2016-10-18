@@ -170,7 +170,7 @@ Using other FBCSA indexes is analogous.
 - A very fast hash function by Yann Collet (xxHash)
 
 ##References
-1. Sz. Grabowski, M. Raniszewski. Two simple full-text indexes based on the suffix array. arXiv:1405.5919, 2016
+1. Sz. Grabowski, M. Raniszewski. Two simple full-text indexes based on the suffix array. arXiv:1405.5919, 2016.
 
 ##Authors
 - Szymon Grabowski
