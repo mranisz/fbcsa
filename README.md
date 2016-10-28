@@ -122,6 +122,23 @@ FBCSALut2<unsigned int BS>();
 FBCSALut2<unsigned int BS>(unsigned int ss);
 ```
 
+##FBCSAHyb\<unsigned int BS\>
+Hybrid of FBCSA and the plain SA. The first floor(log((n + 1) / 64)) + 1 binary search steps (searching for the left boundary) are performed using plain SA (for n < 63 we perform 1 step). Moreover, the right boundary is searched using doubling technique.
+
+Parameters:
+- BS - block size
+- ss - sampling step (default: ss = 5)
+
+Limitations: 
+- BS > 0 and ss > 0
+- BS must be a multiple of 32
+
+Constructors:
+```
+FBCSAHyb<unsigned int BS>();
+FBCSAHyb<unsigned int BS>(unsigned int ss);
+```
+
 ##FBCSA usage example
 ```
 #include <iostream>

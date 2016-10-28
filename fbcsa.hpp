@@ -999,7 +999,12 @@ private:
         
 public:
 
-	FBCSALut2(unsigned int ss) {
+	FBCSALut2() {
+		this->initialize();
+                this->setSs(5);
+	}
+    
+        FBCSALut2(unsigned int ss) {
 		this->initialize();
                 this->setSs(ss);
 	}
@@ -1080,6 +1085,255 @@ public:
                     res.insert(res.end(), saValues, saValues + (end - beg));
                     delete[] saValues;
             }
+        }
+};
+
+template<unsigned int BS> class FBCSAHyb : public FBCSA<BS> {
+private:
+        unsigned int *sampledSA;
+        unsigned int *alignedSampledSA;
+        unsigned int sampledSALen;
+        unsigned int saDepth;
+        
+        void freeMemory() {
+            FBCSA<BS>::freeMemory();
+            if (this->sampledSA != NULL) delete[] this->sampledSA;
+        }
+        
+        void initialize() {
+            FBCSA<BS>::initialize();
+            this->sampledSA = NULL;
+            this->alignedSampledSA = NULL;
+            this->sampledSALen = 0;
+            this->saDepth = 0;
+        }
+        
+        void binarySearchHybAStrcmp(unsigned char *pattern, int patternLength, unsigned int &beg, unsigned int &end) {
+            unsigned int l = 0;
+            unsigned int r = this->textLen + 1;
+            unsigned int mid;
+            unsigned int depth = 0;
+            unsigned int index = 1;
+            while (l < r) {
+                mid = (l + r) / 2;
+                if (depth > this->saDepth) {
+                    if (A_strcmp((const char*)pattern, (const char*)(this->alignedText + this->extract(mid))) > 0) {
+                        l = mid + 1;
+                    }
+                    else {
+                        r = mid;
+                    }
+                } else {
+                    if (A_strcmp((const char*)pattern, (const char*)(this->alignedText + this->alignedSampledSA[index])) > 0) {
+                        l = mid + 1;
+                        index = (index << 1) + 1;
+                    }
+                    else {
+                        r = mid;
+                        index = (index << 1);
+                    }
+                    ++depth;
+                }
+            }
+            beg = l;
+            unsigned int maxGap = this->textLen + 1 - beg;
+            ++pattern[patternLength - 1];
+            for (unsigned int i = 1; ; i <<= 1) {
+                    if (i >= maxGap) {
+                            r = this->textLen + 1;
+                            break;
+                    }
+                    r = l + i;
+                    if (A_strcmp((const char*)pattern, (const char*)(this->alignedText + this->extract(r))) <= 0) {
+                            break;
+                    }
+            }
+            while (l < r) {
+                    mid = (l + r) / 2;
+                    if (A_strcmp((const char*)pattern, (const char*)(this->alignedText + this->extract(mid))) <= 0) {
+                            r = mid;
+                    }
+                    else {
+                            l = mid + 1;
+                    }
+            }
+            --pattern[patternLength - 1];
+            end = r;
+        }
+        
+        void binarySearchHybStrncmp(unsigned char *pattern, int patternLength, unsigned int &beg, unsigned int &end) {
+            unsigned int l = 0;
+            unsigned int r = this->textLen + 1;
+            unsigned int mid;
+            unsigned int depth = 0;
+            unsigned int index = 1;
+            while (l < r) {
+                mid = (l + r) / 2;
+                if (depth > this->saDepth) {
+                    if (strncmp((const char*)pattern, (const char*)(this->alignedText + this->extract(mid)), patternLength) > 0) {
+                        l = mid + 1;
+                    }
+                    else {
+                        r = mid;
+                    }
+                } else {
+                    if (strncmp((const char*)pattern, (const char*)(this->alignedText + this->alignedSampledSA[index]), patternLength) > 0) {
+                        l = mid + 1;
+                        index = (index << 1) + 1;
+                    }
+                    else {
+                        r = mid;
+                        index = (index << 1);
+                    }
+                    ++depth;
+                }
+            }
+            beg = l;
+            unsigned int maxGap = this->textLen + 1 - beg;
+            for (unsigned int i = 1; ; i <<= 1) {
+                    if (i >= maxGap) {
+                            r = this->textLen + 1;
+                            break;
+                    }
+                    r = l + i;
+                    if (strncmp((const char*)pattern, (const char*)(this->alignedText + this->extract(r)), patternLength) < 0) {
+                            break;
+                    }
+            }
+            while (l < r) {
+                    mid = (l + r) / 2;
+                    if (strncmp((const char*)pattern, (const char*)(this->alignedText + this->extract(mid)), patternLength) < 0) {
+                            r = mid;
+                    }
+                    else {
+                            l = mid + 1;
+                    }
+            }
+            end = r;
+        }
+        
+public:
+        const static unsigned int H = 32;
+
+	FBCSAHyb() {
+		this->initialize();
+                this->setSs(5);
+	}
+        
+        FBCSAHyb(unsigned int ss) {
+		this->initialize();
+                this->setSs(ss);
+	}
+        
+        ~FBCSAHyb() {
+		this->free();
+	}
+        
+        void build(const char *textFileName) {
+            this->free();
+            this->loadText(textFileName);
+
+            unsigned int saLen;
+            unsigned int *sa = getSA(textFileName, this->alignedText, this->textLen, saLen, BS - ((this->textLen + 1) % BS));
+
+            this->buildIndex(sa, saLen);
+
+            if (saLen >= (2 * H)) this->saDepth = floor(log2(saLen / (2 * H)));
+            else this->saDepth = 0;
+            
+            this->sampledSALen = exp2(this->saDepth + 1);
+            this->sampledSA = new unsigned int[this->sampledSALen + 32];
+            this->alignedSampledSA = this->sampledSA;
+            while ((unsigned long long)this->alignedSampledSA % 128) ++this->alignedSampledSA;
+            this->alignedSampledSA[0] = 0;
+            
+            this->fillSampledSA(sa, 0, saLen, 0, 1);
+
+            delete[] sa;
+        }
+        
+        void fillSampledSA(unsigned int *sa, unsigned int l, unsigned int r, unsigned int depth, unsigned int index) {
+            if ((depth <= this->saDepth) && (l < r)) {
+                unsigned int mid = (l + r) / 2;
+                this->alignedSampledSA[index] = sa[mid];
+                this->fillSampledSA(sa, l, mid, depth + 1, (index << 1));
+                this->fillSampledSA(sa, mid + 1, r, depth + 1, ((index << 1) + 1));
+            }
+        }
+        
+        void save(FILE *outFile) {
+            FBCSA<BS>::save(outFile);
+            fwrite(&this->saDepth, (size_t)sizeof(unsigned int), (size_t)1, outFile);
+            fwrite(&this->sampledSALen, (size_t)sizeof(unsigned int), (size_t)1, outFile);
+            if (this->sampledSALen > 0) fwrite(this->alignedSampledSA, (size_t)sizeof(unsigned int), (size_t)this->sampledSALen, outFile);
+        }
+        
+        void save(const char *fileName) {
+            cout << "Saving index in " << fileName << " ... " << flush;
+            FILE *outFile = fopen(fileName, "w");
+            this->save(outFile);
+            fclose(outFile);
+            cout << "Done" << endl;
+        }
+        
+	void load(FILE *inFile) {
+            FBCSA<BS>::load(inFile);
+            size_t result = fread(&this->saDepth, (size_t)sizeof(unsigned int), (size_t)1, inFile);
+            if (result != 1) {
+                    cout << "Error loading index" << endl;
+                    exit(1);
+            }
+            result = fread(&this->sampledSALen, (size_t)sizeof(unsigned int), (size_t)1, inFile);
+            if (result != 1) {
+                    cout << "Error loading index" << endl;
+                    exit(1);
+            }
+            if (this->sampledSALen > 0) {
+                    this->sampledSA = new unsigned int[this->sampledSALen + 32];
+                    this->alignedSampledSA = this->sampledSA;
+                    while ((unsigned long long)this->alignedSampledSA % 128) ++this->alignedSampledSA;
+                    result = fread(this->alignedSampledSA, (size_t)sizeof(unsigned int), (size_t)this->sampledSALen, inFile);
+                    if (result != this->sampledSALen) {
+                            cout << "Error loading index" << endl;
+                            exit(1);
+                    }
+            }
+        }
+        
+        void load(const char *fileName) { 
+            FILE *inFile = fopen(fileName, "rb");
+            cout << "Loading index from " << fileName << " ... " << flush;
+            this->load(inFile);
+            fclose(inFile);
+            cout << "Done" << endl;
+        }
+        
+        unsigned int getIndexSize() {       
+            unsigned int size = FBCSA<BS>::getIndexSize() + sizeof(this->sampledSALen) + sizeof(this->saDepth);
+            if (this->sampledSALen > 0) size += (this->sampledSALen + 32) * sizeof(unsigned int);
+            return size;
+        }
+        
+        void free() {
+            this->freeMemory();
+            this->initialize();
+        }
+        
+        unsigned int count(unsigned char *pattern, unsigned int patternLen) {
+            unsigned int beg, end;
+            if (pattern[patternLen - 1] == 255) this->binarySearchHybStrncmp(pattern, patternLen, beg, end);
+            else this->binarySearchHybAStrcmp(pattern, patternLen, beg, end);
+            return end - beg;
+        }
+        
+	void locate(unsigned char* pattern, unsigned int patternLen, vector<unsigned int>& res) {
+            unsigned int beg, end;
+            if (pattern[patternLen - 1] == 255) this->binarySearchHybStrncmp(pattern, patternLen, beg, end);
+            else this->binarySearchHybAStrcmp(pattern, patternLen, beg, end);
+            unsigned int *saValues = new unsigned int[end - beg];
+            this->extractSeq(beg, end - beg, saValues);
+            res.insert(res.end(), saValues, saValues + (end - beg));
+            delete[] saValues;
         }
 };
 
