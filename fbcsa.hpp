@@ -1145,6 +1145,7 @@ private:
                     }
                     r = l + i;
                     if (A_strcmp((const char*)pattern, (const char*)(this->alignedText + this->extract(r))) <= 0) {
+                            l += (i >> 1);
                             break;
                     }
             }
@@ -1197,6 +1198,7 @@ private:
                     }
                     r = l + i;
                     if (strncmp((const char*)pattern, (const char*)(this->alignedText + this->extract(r)), patternLength) < 0) {
+                            l += (i >> 1);
                             break;
                     }
             }
