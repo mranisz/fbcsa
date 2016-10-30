@@ -7,7 +7,7 @@ FBCSA (Fixed Block based Compact Suffix Array) \[[1](#references)\] is a compact
 The FBCSA text indexes require:
 - C++11 ready compiler such as g++ version 4.7 or higher
 - a 64-bit operating system
-- text size is limited to 2GB
+- text size < 2GB
 
 ##Installation
 To download and build the library use the following commands:
@@ -45,7 +45,7 @@ void free();
 ```
 - get the **index size** in bytes (size in memory):
 ```
-unsigned int getIndexSize();
+unsigned long long getIndexSize();
 ```
 - get the size in bytes of the text used to build the index:
 ```

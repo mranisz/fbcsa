@@ -766,8 +766,8 @@ public:
             this->initialize();
         }
         
-	unsigned int getIndexSize() {
-            unsigned int size = sizeof(BS) + sizeof(this->ss) + sizeof(this->arr1Len) + sizeof(this->arr2Len) + sizeof(this->textLen) + sizeof(FBCSA::encodedCharsNum);
+	unsigned long long getIndexSize() {
+            unsigned long long size = sizeof(BS) + sizeof(this->ss) + sizeof(this->arr1Len) + sizeof(this->arr2Len) + sizeof(this->textLen) + sizeof(FBCSA::encodedCharsNum);
             if (this->arr1Len > 0) size += (this->arr1Len + 32) * sizeof(unsigned int);
             if (this->arr2Len > 0) size += (this->arr2Len + 32) * sizeof(unsigned int);
             if (this->textLen > 0) size += (this->textLen + 128 + 1) * sizeof(unsigned char);
@@ -963,7 +963,7 @@ public:
             this->initialize();
         }
         
-	unsigned int getIndexSize() {
+	unsigned long long getIndexSize() {
             return FBCSA<BS>::getIndexSize() + sizeof(this->ht) + this->ht->getHTSize();
         }
 
@@ -1053,7 +1053,7 @@ public:
             cout << "Done" << endl;
         }
         
-        unsigned int getIndexSize() {
+        unsigned long long getIndexSize() {
             return FBCSA<BS>::getIndexSize() + 256 * 256 * 2 * sizeof(unsigned int);
         }
         
@@ -1310,8 +1310,8 @@ public:
             cout << "Done" << endl;
         }
         
-        unsigned int getIndexSize() {       
-            unsigned int size = FBCSA<BS>::getIndexSize() + sizeof(this->sampledSALen) + sizeof(this->saDepth);
+        unsigned long long getIndexSize() {       
+            unsigned long long size = FBCSA<BS>::getIndexSize() + sizeof(this->sampledSALen) + sizeof(this->saDepth);
             if (this->sampledSALen > 0) size += (this->sampledSALen + 32) * sizeof(unsigned int);
             return size;
         }
