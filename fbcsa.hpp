@@ -869,7 +869,7 @@ protected:
                 while (true) {
                     leftBoundary = this->ht->alignedBoundariesHT[hash];
                     if (leftBoundary >= leftBoundaryLUT2 && leftBoundary < rightBoundaryLUT2 && strncmp((const char *)pattern + 2, (const char *)(this->alignedText + this->extract(leftBoundary) + 2), this->ht->prefixLength) == 0) {
-                        step = (unsigned int)ceil(((double)rightBoundaryLUT2 + 1 - leftBoundaryLUT2) / 65536);
+                        step = (unsigned int)ceil(((double)rightBoundaryLUT2 + 1 - leftBoundaryLUT2) / 65535);
                         if ((hash & 1) == 0) rightBoundary = (this->ht->alignedDenseBoundariesHT[hash / 2] >> 16) * step + leftBoundaryLUT2;
                         else rightBoundary = (this->ht->alignedDenseBoundariesHT[hash / 2] & 0xFFFF) * step + leftBoundaryLUT2;
                         break;
