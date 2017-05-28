@@ -1,15 +1,15 @@
 # FBCSA text indexes library
 
-##What is it?
+## What is it?
 FBCSA (Fixed Block based Compact Suffix Array) \[[1](#references)\] is a compact text index, with space use of about 1.5n - 2.5n bytes (+1n bytes for the indexed text), depending on the indexed text characteristics and two construction-time parameters: block size and sampling step, which allows for relatively fast pattern search and access to an arbitrary T[i] symbol.
 
-##Requirements
+## Requirements
 The FBCSA text indexes require:
 - C++11 ready compiler such as g++ version 4.7 or higher
 - a 64-bit operating system
 - text size < 2GB
 
-##Installation
+## Installation
 To download and build the library use the following commands:
 ```
 git clone https://github.com/mranisz/fbcsa.git
@@ -17,7 +17,7 @@ cd fbcsa
 make
 ```
 
-##Usage
+## Usage
 To use the FBCSA library:
 - include "fbcsa/fbcsa.hpp" to your project
 - compile it with "-std=c++11 -O3 -mpopcnt" options and link it with libraries:
@@ -25,7 +25,7 @@ To use the FBCSA library:
   - fbcsa/libs/libaelf64.a (linux) or fbcsa/libs/libacof64.lib (windows)
 - use "fbcsa" and "shared" namespaces
 
-##API
+## API
 There are several functions you can call on each of the FBCSA text index:
 - **build** the index using text file called textFileName:
 ```
@@ -64,7 +64,7 @@ unsigned int count(unsigned char *pattern, unsigned int patternLen);
 void locate(unsigned char *pattern, unsigned int patternLen, vector<unsigned int>& res);
 ```
 
-##FBCSA\<unsigned int BS\>
+## FBCSA\<unsigned int BS\>
 
 Parameters:
 - BS - block size
@@ -80,7 +80,7 @@ FBCSA<unsigned int BS>();
 FBCSA<unsigned int BS>(unsigned int ss);
 ```
 
-##FBCSAHash\<unsigned int BS, HTType HASHTYPE\>
+## FBCSAHash\<unsigned int BS, HTType HASHTYPE\>
 FBCSAHash is FBCSA with hashed k-symbol prefixes of suffix array suffixes to speed up searches (k ≥ 2). This variant is particularly efficient in speed for short patterns (not much longer than k).
 
 Parameters:
@@ -104,7 +104,7 @@ Constructors:
 FBCSAHash<unsigned int BS, HTType HASHTYPE>(unsigned int ss, unsigned int k, double loadFactor);
 ```
 
-##FBCSALut2\<unsigned int BS\>
+## FBCSALut2\<unsigned int BS\>
 To speed up searches, FBCSA stores lookup table over all 2-symbol strings (LUT2), whose entries are the suffix intervals.
 
 Parameters:
@@ -122,7 +122,7 @@ FBCSALut2<unsigned int BS>();
 FBCSALut2<unsigned int BS>(unsigned int ss);
 ```
 
-##FBCSAHyb\<unsigned int BS\>
+## FBCSAHyb\<unsigned int BS\>
 Hybrid of FBCSA and the plain SA. The first floor(log((n + 1) / 64)) + 1 binary search steps (searching for the left boundary) are performed using plain SA (for n < 63 we perform 1 step). Moreover, the right boundary is searched using doubling technique.
 
 Parameters:
@@ -139,7 +139,7 @@ FBCSAHyb<unsigned int BS>();
 FBCSAHyb<unsigned int BS>(unsigned int ss);
 ```
 
-##FBCSA usage example
+## FBCSA usage example
 ```
 #include <iostream>
 #include <stdlib.h>
@@ -181,14 +181,14 @@ int main(int argc, char *argv[]) {
 ```
 Using other FBCSA indexes is analogous.
 
-##External resources used in FBCSA project
+## External resources used in FBCSA project
 - Suffix array building by Yuta Mori (sais)
 - A multi-platform library of highly optimized functions for C and C++ by Agner Fog (asmlib)
 - A very fast hash function by Yann Collet (xxHash)
 
-##References
+## References
 1. Sz. Grabowski, M. Raniszewski. Two simple full-text indexes based on the suffix array. arXiv:1405.5919, 2016.
 
-##Authors
+## Authors
 - Szymon Grabowski
 - [Marcin Raniszewski](https://github.com/mranisz)
