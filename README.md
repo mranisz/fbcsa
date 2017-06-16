@@ -6,7 +6,7 @@ FBCSA (Fixed Block based Compact Suffix Array) \[[1](#references)\] is a compact
 ## Requirements
 The FBCSA text indexes require:
 - C++11 ready compiler such as g++ version 4.7 or higher
-- a 64-bit operating system
+- a 64-bit UNIX operating system
 - text size < 2GB
 
 ## Installation
@@ -22,7 +22,7 @@ To use the FBCSA library:
 - include "fbcsa/fbcsa.hpp" to your project
 - compile it with "-std=c++11 -O3 -mpopcnt" options and link it with libraries:
   - fbcsa/libfbcsa.a
-  - fbcsa/libs/libaelf64.a (linux) or fbcsa/libs/libacof64.lib (windows)
+  - fbcsa/libs/libaelf64.a
 - use "fbcsa" and "shared" namespaces
 
 ## API
