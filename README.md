@@ -86,8 +86,8 @@ FBCSAHash is FBCSA with hashed k-symbol prefixes of suffix array suffixes to spe
 Parameters:
 - BS - block size
 - HASHTYPE:
-      - HT_STANDARD - using 8 bytes for each hashed entry: 4 bytes for left boundary + 4 bytes for right boundary
-      - HT_DENSE - using 6 bytes for each hashed entry: 4 bytes for left boundary + 2 bytes for right boundary
+  - HT_STANDARD - using 8 bytes for each hashed entry: 4 bytes for left boundary + 4 bytes for right boundary
+  - HT_DENSE - using 6 bytes for each hashed entry: 4 bytes for left boundary + 2 bytes for right boundary
 - ss - sampling step
 - k - length of prefixes of suffixes from suffix array
 - loadFactor - hash table load factor
