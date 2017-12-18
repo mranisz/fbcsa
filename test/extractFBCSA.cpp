@@ -66,7 +66,7 @@ void fbcsa32(string ss, const char *textFileName, unsigned int seqNum, unsigned 
 			timer.stopTimer();
 	}
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_extract_FBCSA.txt";
+	string resultFileName = "results/" + string(textFileName) + "_extract_FBCSA.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "extract FBCSA-32-" << ss << " " << textFileName << " seqLen=" << seqLen << " queries=" << seqNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -118,7 +118,7 @@ void fbcsa64(string ss, const char *textFileName, unsigned int seqNum, unsigned 
 			timer.stopTimer();
 	}
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_extract_FBCSA.txt";
+	string resultFileName = "results/" + string(textFileName) + "_extract_FBCSA.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "extract FBCSA-64-" << ss << " " << textFileName << " seqLen=" << seqLen << " queries=" << seqNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;

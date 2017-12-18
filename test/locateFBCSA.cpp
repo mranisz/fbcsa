@@ -90,7 +90,7 @@ void fbcsa32(string ss, const char *textFileName, unsigned int queriesNum, unsig
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSA.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSA.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSA-32-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -138,7 +138,7 @@ void fbcsa64(string ss, const char *textFileName, unsigned int queriesNum, unsig
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSA.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSA.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSA-64-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -186,7 +186,7 @@ void fbcsaHyb32(string ss, const char *textFileName, unsigned int queriesNum, un
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSAHyb.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSAHyb.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSAHyb-32-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -234,7 +234,7 @@ void fbcsaHyb64(string ss, const char *textFileName, unsigned int queriesNum, un
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSAHyb.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSAHyb.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSAHyb-64-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -282,7 +282,7 @@ void fbcsa32Lut2(string ss, const char *textFileName, unsigned int queriesNum, u
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSALut2.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSALut2.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsaLut2->getIndexSize() / (double)fbcsaLut2->getTextSize();
 	cout << "locate FBCSALut2-32-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -330,7 +330,7 @@ void fbcsa64Lut2(string ss, const char *textFileName, unsigned int queriesNum, u
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSALut2.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSALut2.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsaLut2->getIndexSize() / (double)fbcsaLut2->getTextSize();
 	cout << "locate FBCSALut2-64-" << ss << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -378,7 +378,7 @@ void fbcsa32Hash(string ss, string k, string loadFactor, const char *textFileNam
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSA-hash.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSA-hash.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSA-hash-32-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -426,7 +426,7 @@ void fbcsa64Hash(string ss, string k, string loadFactor, const char *textFileNam
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSA-hash.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSA-hash.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSA-hash-64-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -474,7 +474,7 @@ void fbcsa32HashDense(string ss, string k, string loadFactor, const char *textFi
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSA-hash-dense.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSA-hash-dense.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSA-hash-dense-32-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
@@ -522,7 +522,7 @@ void fbcsa64HashDense(string ss, string k, string loadFactor, const char *textFi
 	}
 	timer.stopTimer();
 
-	string resultFileName = "results/fbcsa/" + string(textFileName) + "_locate_FBCSA-hash-dense.txt";
+	string resultFileName = "results/" + string(textFileName) + "_locate_FBCSA-hash-dense.txt";
 	fstream resultFile(resultFileName.c_str(), ios::out | ios::binary | ios::app);
 	double size = (double)fbcsa->getIndexSize() / (double)fbcsa->getTextSize();
 	cout << "locate FBCSA-hash-dense-64-" << ss << "-" << k << "-" << loadFactor << " " << textFileName << " m=" << m << " queries=" << queriesNum << " size=" << size << "n time=" << timer.getElapsedTime() << endl;
