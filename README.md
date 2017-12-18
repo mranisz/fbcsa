@@ -181,6 +181,16 @@ int main(int argc, char *argv[]) {
 ```
 Using other FBCSA indexes is analogous.
 
+## Benchmark
+Benchmark scripts:
+- countFBCSA.sh - benchmark for FBCSA count operations
+- locateFBCSA.sh - benchmark script for FBCSA locate operations
+- extractFBCSA.sh - benchmark script for FBCSA extract operations
+
+Benchmark scripts should be run with superuser privileges (as the memory cache is cleared before each test). Benchmark results are saved in the "results" folder.
+
+Before launching a benchmark please download the data files from [http://ranisz.iis.p.lodz.pl/indexes/data/text_files/200/](http://ranisz.iis.p.lodz.pl/indexes/data/text_files/200/) and [http://ranisz.iis.p.lodz.pl/indexes/data/text_files/50/](http://ranisz.iis.p.lodz.pl/indexes/data/text_files/50/) and extract them into the main project folder.
+
 ## External resources used in FBCSA project
 - Suffix array building by Yuta Mori (sais)
 - A multi-platform library of highly optimized functions for C and C++ by Agner Fog (asmlib)
