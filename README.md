@@ -20,7 +20,7 @@ make
 ## Usage
 To use the FBCSA library:
 - include "fbcsa/fbcsa.hpp" to your project
-- compile it with "-std=c++11 -O3 -mpopcnt" options and link it with libraries:
+- compile it with "-faligned-new -std=c++11 -O3 -mpopcnt" options and link it with libraries:
   - fbcsa/libfbcsa.a
   - fbcsa/libs/libaelf64.a
 - use "fbcsa" and "shared" namespaces
